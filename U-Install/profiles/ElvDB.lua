@@ -180,7 +180,7 @@ local profile = {
 						["power"] = {
 							["offset"] = 7,
 							["position"] = "BOTTOMRIGHT",
-							["text_format"] = "[powercolor][power:current]",
+							["text_format"] = "",
 						},
 						["customTexts"] = {
 						},
@@ -234,7 +234,7 @@ local profile = {
 						},
 						["power"] = {
 							["offset"] = 6,
-							["text_format"] = "[powercolor][power:current]",
+							["text_format"] = "",
 						},
 						["width"] = 191,
 						["health"] = {
@@ -301,7 +301,7 @@ local profile = {
 							["offset"] = 7,
 							["position"] = "BOTTOMLEFT",
 							["hideonnpc"] = false,
-							["text_format"] = "[powercolor][power:current]",
+							["text_format"] = "",
 						},
 						["customTexts"] = {
 						},
@@ -363,7 +363,7 @@ local profile = {
 						},
 						["power"] = {
 							["offset"] = 6,
-							["text_format"] = "[powercolor][power:current]",
+							["text_format"] = "",
 						},
 						["healPrediction"] = true,
 						["health"] = {
