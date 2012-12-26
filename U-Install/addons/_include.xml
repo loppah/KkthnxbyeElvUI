@@ -1,0 +1,7 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+  <!-- Folders (Multiple Profiles) -->
+  <!-- <Include file="folder_name\_.xml"/> -->
+  
+  <!-- Profiles -->
+  <Script file="loader.lua"/>
+</Ui>

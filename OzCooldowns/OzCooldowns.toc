@@ -1,0 +1,10 @@
+## Interface: 50001
+## DefaultState: Enabled
+## Title: |cFF00FFFFOz|rCooldowns |cffC495DDTukui|r/|cff1784d1ElvUI|r Edition
+## Author: Nimaear, Azilroka
+## Version: 1.05
+## OptionalDeps: Tukui, ElvUI
+## SavedVariables: OzCooldownsDirection, OzCooldownsMode, OzCooldownsDisplay
+## Notes: Cooldowns
+
+Core.lua

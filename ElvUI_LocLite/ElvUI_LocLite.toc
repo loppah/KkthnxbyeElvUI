@@ -1,0 +1,10 @@
+﻿## Interface: 50100
+## Author: Benik
+## Version: 1.04
+## Title: |cff1784d1ElvUI|r Location Lite
+## Notes: Location Lite Plugin for ElvUI 5+
+## RequiredDeps: ElvUI
+## DefaultState: Enabled
+
+locales\load_locales.xml
+init.xml
