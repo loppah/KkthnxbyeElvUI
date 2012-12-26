@@ -117,8 +117,8 @@ local profile = {
 				["fontOutline"] = "OUTLINE",
 				["chatHistory"] = false,
 				["tabFontOutline"] = "OUTLINE",
-				["tabFont"] = "Accidental Presidency",
-				["tabFontSize"] = 15,
+				["tabFont"] = "Oswald Regular",
+				["tabFontSize"] = 11,
 				["panelHeight"] = 164,
 				["panelWidth"] = 352,
 			},
@@ -497,12 +497,14 @@ local profile = {
 			["auras"] = {
 				["fontSize"] = 12,
 				["font"] = "Oswald Regular",
+				["fontOutline"] = "OUTLINE", -- Forgot to add this
 				["consolidatedBuffs"] = {
 					["font"] = "Oswald Regular",
 					["filter"] = false,
 					["enable"] = false,
 					["durations"] = false,
 					["fontSize"] = 12,
+					["fontOutline"] = "OUTLINE", -- Forgot to add this
 				},
 			},
 			["actionbar"] = {
