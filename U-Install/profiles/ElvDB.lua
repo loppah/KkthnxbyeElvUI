@@ -92,7 +92,7 @@ local profile = {
 				["ElvAB_5"] = "BOTTOMElvUIParentBOTTOM-2304",
 				["TempEnchantMover"] = "TOPLEFTElvUIParentTOPLEFT4-201",
 				["VehicleSeatMover"] = "TOPLEFTElvUIParentTOPLEFT169-4",
-				["ElvUF_TargetMover"] = "BOTTOMElvUIParentBOTTOM181164",
+				["ElvUF_TargetMover"] = "BOTTOMElvUIParentBOTTOM181160",
 				["BNETMover"] = "TOPElvUIParentTOP0-23",
 				["ShiftAB"] = "BOTTOMElvUIParentBOTTOM096",
 				["WatchFrameMover"] = "TOPRIGHTElvUIParentTOPRIGHT-40-275",
@@ -103,7 +103,7 @@ local profile = {
 				["BossHeaderMover"] = "BOTTOMRIGHTElvUIParentBOTTOMRIGHT-166270",
 				["TotemBarMover"] = "BOTTOMLEFTElvUIParentBOTTOMLEFT3574",
 				["ElvUF_PlayerCastbarMover"] = "BOTTOMElvUIParentBOTTOM067",
-				["ElvUF_PlayerMover"] = "BOTTOMElvUIParentBOTTOM-181164",
+				["ElvUF_PlayerMover"] = "BOTTOMElvUIParentBOTTOM-181160",
 				["AlertFrameMover"] = "TOPElvUIParentTOP0-469",
 				["ReputationBarMover"] = "TOPLEFTElvUIParentTOPLEFT5-189",
 				["MinimapMover"] = "TOPLEFTElvUIParentTOPLEFT4-4",
@@ -195,7 +195,7 @@ local profile = {
 							["displayTarget"] = true,
 							["height"] = 21,
 						},
-						["height"] = 45,
+						["height"] = 50,
 						["buffs"] = {
 							["sizeOverride"] = 25,
 							["enable"] = true,
@@ -314,7 +314,7 @@ local profile = {
 						["castbar"] = {
 							["width"] = 235,
 						},
-						["height"] = 45,
+						["height"] = 50,
 						["buffs"] = {
 							["sizeOverride"] = 25,
 						},
@@ -369,7 +369,7 @@ local profile = {
 						["health"] = {
 							["text_format"] = "[healthcolor][health:current-percent]",
 						},
-						["height"] = 42,
+						["height"] = 45,
 						["petsGroup"] = {
 							["initialAnchor"] = "BOTTOM",
 						},
