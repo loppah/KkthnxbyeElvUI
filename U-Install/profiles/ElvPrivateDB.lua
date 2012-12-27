@@ -1,21 +1,14 @@
 local E, L, C = unpack(select(2, ...))
 
-local name = "ElvPrivateDB"
+local name, ace3 = "ElvPrivateDB", true
 local profile = {
-  ["profileKeys"] = {
-    [UnitName("player").." - "..GetRealmName()] = "Default",
+  ["skins"] = {
+    ["addons"] = {
+      ["EmbedSkada"] = true,
+      ["AlwaysTrue"] = true,
+    },
   },
-	["profiles"] = {
-		["Default"] = {
-			["skins"] = {
-				["addons"] = {
-					["EmbedSkada"] = true,
-					["AlwaysTrue"] = true,
-				},
-			},
-			["install_complete"] = "5.1",
-		},
-  },
+  ["install_complete"] = "5.1",
 }
 
-E:RegisterProfile(name, profile)
+E:RegisterProfile(name, profile, ace3)

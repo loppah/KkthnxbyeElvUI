@@ -1,13 +1,14 @@
 ## Interface: 50100
 ## Title: |cffFF0000U|r|cffFFFFFF-|r|cffFFFF00Install|r
-## Notes: An Add-On that helps install compilation UI's!
+## Notes: An Add-On that helps install compilation UI's! (Made for |cffC5B358Kkthnxbye|r|cff7282E0ElvUI)
 ## Author: Dandruff (Dluffy-Emerald Dream US)
-## Version: 1.0.1
+## Version: 1.0.2
 ## SavedVariables: UInstallDB
+## OptionalDeps: ElvUI
 
 init.lua
 load_locales.xml
 core.lua
 
-addons\_include.xml
+startup\_include.xml
 profiles\_include.xml

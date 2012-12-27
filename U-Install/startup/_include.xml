@@ -1,0 +1,8 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+  <!-- Folders (Multiple Profiles) -->
+  <!-- <Include file="folder_name\_.xml"/> -->
+  
+  <!-- Startup Scripts -->
+  <Script file="loader.lua"/>
+  <Script file="disable_elvui.lua"/>
+</Ui>

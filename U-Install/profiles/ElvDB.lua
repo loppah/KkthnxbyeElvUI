@@ -1,17 +1,8 @@
 local E, L, C = unpack(select(2, ...))
 
-local name = "ElvDB"
+local name, ace3 = "ElvDB", true
 local profile = {
-  ["profileKeys"] = {
-    [UnitName("player").." - "..GetRealmName()] = "Default",
-  },
-	["namespaces"] = {
-		["LibDualSpec-1.0"] = {
-		},
-	},
-	["profiles"] = {
-		["Default"] = {
-			["nameplate"] = {
+  ["nameplate"] = {
 				["fontSize"] = 9,
 				["auraFontOutline"] = "OUTLINE",
 				["fontOutline"] = "OUTLINE",
@@ -521,8 +512,6 @@ local profile = {
 					["fontSize"] = 12,
 				},
 			},
-		},
-	},
 }
 
-E:RegisterProfile(name, profile)
+E:RegisterProfile(name, profile, ace3)
