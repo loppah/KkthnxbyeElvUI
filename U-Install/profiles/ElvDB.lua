@@ -345,7 +345,7 @@ local profile = {
 					},
 				},
 				["OORAlpha"] = 0.25,
-				["statusbar"] = "Flatt",
+				["statusbar"] = "Normal",
 				["colors"] = {
 					["auraBarBuff"] = {
 						["r"] = 0.1176470588235294,
