@@ -12,16 +12,15 @@ local profile = {
 	["profiles"] = {
 		["Default"] = {
 			["nameplate"] = {
-				["classIcons"] = true, -- Not sure about this.
 				["fontSize"] = 9,
 				["auraFontOutline"] = "OUTLINE",
 				["fontOutline"] = "OUTLINE",
 				["enhancethreat"] = false,
 				["auraFont"] = "Oswald Bold",
-				["width"] = 100,
+				["combat"] = true,
 				["font"] = "Oswald Bold",
 				["height"] = 9,
-				["combat"] = true,
+				["width"] = 100,
 			},
 			["currentTutorial"] = 1,
 			["general"] = {
@@ -29,25 +28,25 @@ local profile = {
 					["spacing"] = 3,
 					["size"] = 37,
 				},
-				["autoRepair"] = "NONE",
 				["minimap"] = {
 					["locationText"] = "HIDE",
 					["size"] = 160,
 				},
 				["health_backdrop"] = {
 				},
-				["bottomPanel"] = false,
+				["DEBUFFS"] = {
+				},
 				["backdropfadecolor"] = {
 					["a"] = 0.8200000077486038,
-					["r"] = 0.05882352941176471,
-					["g"] = 0.05882352941176471,
 					["b"] = 0.05882352941176471,
+					["g"] = 0.05882352941176471,
+					["r"] = 0.05882352941176471,
 				},
 				["valuecolor"] = {
 					["a"] = 1,
-					["b"] = 0.9372549019607843,
-					["g"] = 0.5137254901960784,
 					["r"] = 0.05882352941176471,
+					["g"] = 0.5137254901960784,
+					["b"] = 0.9372549019607843,
 				},
 				["reputation"] = {
 					["width"] = 162,
@@ -55,18 +54,17 @@ local profile = {
 				["autoRoll"] = true,
 				["castNoInterrupt"] = {
 				},
-				["experience"] = {
-					["height"] = 11,
-					["width"] = 352,
-				},
 				["health"] = {
 				},
+				["topPanel"] = false,
 				["castColor"] = {
 				},
 				["BUFFS"] = {
 				},
-				["topPanel"] = false,
-				["DEBUFFS"] = {
+				["bottomPanel"] = false,
+				["experience"] = {
+					["height"] = 11,
+					["width"] = 352,
 				},
 			},
 			["movers"] = {
@@ -92,20 +90,20 @@ local profile = {
 				["ElvAB_5"] = "BOTTOMElvUIParentBOTTOM-2304",
 				["TempEnchantMover"] = "TOPLEFTElvUIParentTOPLEFT4-201",
 				["VehicleSeatMover"] = "TOPLEFTElvUIParentTOPLEFT169-4",
-				["ElvUF_TargetMover"] = "BOTTOMElvUIParentBOTTOM181160",
+				["ReputationBarMover"] = "TOPLEFTElvUIParentTOPLEFT5-189",
 				["BNETMover"] = "TOPElvUIParentTOP0-23",
 				["ShiftAB"] = "BOTTOMElvUIParentBOTTOM096",
+				["TotemBarMover"] = "BOTTOMLEFTElvUIParentBOTTOMLEFT3574",
 				["WatchFrameMover"] = "TOPRIGHTElvUIParentTOPRIGHT-40-275",
-				["ElvUF_PetMover"] = "BOTTOMElvUIParentBOTTOM0186",
 				["ArenaHeaderMover"] = "BOTTOMRIGHTElvUIParentBOTTOMRIGHT-132270",
 				["TooltipMover"] = "BOTTOMRIGHTElvUIParentBOTTOMRIGHT-4-10",
 				["ElvUF_TankMover"] = "TOPLEFTElvUIParentTOPLEFT4-341",
 				["BossHeaderMover"] = "BOTTOMRIGHTElvUIParentBOTTOMRIGHT-166270",
-				["TotemBarMover"] = "BOTTOMLEFTElvUIParentBOTTOMLEFT3574",
-				["ElvUF_PlayerCastbarMover"] = "BOTTOMElvUIParentBOTTOM067",
 				["ElvUF_PlayerMover"] = "BOTTOMElvUIParentBOTTOM-181160",
+				["ElvUF_PlayerCastbarMover"] = "BOTTOMElvUIParentBOTTOM067",
+				["ElvUF_PetMover"] = "BOTTOMElvUIParentBOTTOM0186",
 				["AlertFrameMover"] = "TOPElvUIParentTOP0-469",
-				["ReputationBarMover"] = "TOPLEFTElvUIParentTOPLEFT5-189",
+				["ElvUF_TargetMover"] = "BOTTOMElvUIParentBOTTOM181160",
 				["MinimapMover"] = "TOPLEFTElvUIParentTOPLEFT4-4",
 			},
 			["tooltip"] = {
@@ -123,18 +121,19 @@ local profile = {
 				["panelWidth"] = 352,
 			},
 			["unitframe"] = {
-				["fontSize"] = 16,
+				["fontSize"] = 15,
 				["units"] = {
 					["tank"] = {
 						["enable"] = false,
 					},
-					["assist"] = {
-						["enable"] = false,
+					["targettarget"] = {
+						["power"] = {
+							["offset"] = 5,
+						},
+						["width"] = 110,
+						["height"] = 33,
 					},
 					["raid10"] = {
-						["name"] = {
-							["text_format"] = "[namecolor][name:short]",
-						},
 						["power"] = {
 							["offset"] = 5,
 						},
@@ -148,86 +147,19 @@ local profile = {
 							["offset"] = 7,
 						},
 					},
-					["targettarget"] = {
+					["pet"] = {
 						["power"] = {
 							["offset"] = 5,
 						},
 						["width"] = 110,
-						["name"] = {
-							["text_format"] = "[namecolor][name:medium]",
-						},
 						["height"] = 33,
-					},
-					["player"] = {
-						["debuffs"] = {
-							["sizeOverride"] = 25,
-							["attachTo"] = "BUFFS",
-						},
-						["portrait"] = {
-							["overlay"] = true,
-							["enable"] = true,
-							["camDistanceScale"] = 1.3,
-						},
-						["classbar"] = {
-							["enable"] = true,
-							['fill'] = 'filled',
-							['height'] = 5, -- I have no clue why I have this so small. 
-						},
-						["aurabar"] = {
-							["enable"] = false,
-						},
-						["restIcon"] = false,
-						["power"] = {
-							["offset"] = 7,
-							["position"] = "BOTTOMRIGHT",
-							["text_format"] = "",
-						},
-						["customTexts"] = {
-						},
-						["healPrediction"] = false,
-						["width"] = 235,
-						["name"] = {
-							["text_format"] = "[namecolor][name:medium] [difficultycolor][level]",
-							["position"] = "TOPLEFT",
-						},
-						["castbar"] = {
-							["width"] = 362,
-							["displayTarget"] = true,
-							["height"] = 21,
-						},
-						["height"] = 50,
-						["buffs"] = {
-							["sizeOverride"] = 25,
-							["enable"] = true,
-							["noDuration"] = false,
-							["attachTo"] = "FRAME",
-						},
-						["health"] = {
-							["text_format"] = "[healthcolor][health:current-percent]",
-							["position"] = "TOPRIGHT",
-						},
-						["pvp"] = {
-							["text_format"] = "||cFFB04F4F[pvptimer][mouseover]||r",
-						},
-					},
-					["raid25"] = {
-						["name"] = {
-							["text_format"] = "[namecolor][name:short]",
-						},
-						["power"] = {
-							["offset"] = 5,
-						},
-						["width"] = 68,
-						["health"] = {
-							["text_format"] = "[health:deficit]",
-						},
 					},
 					["boss"] = {
 						["debuffs"] = {
 							["xOffset"] = 1,
-							["yOffset"] = 13,
-							["anchorPoint"] = "RIGHT",
 							["perrow"] = 7,
+							["anchorPoint"] = "RIGHT",
+							["yOffset"] = 13,
 						},
 						["portrait"] = {
 							["overlay"] = true,
@@ -237,12 +169,11 @@ local profile = {
 							["text_format"] = "",
 						},
 						["width"] = 191,
+						["castbar"] = {
+							["width"] = 191,
+						},
 						["health"] = {
 							["text_format"] = "[healthcolor][health:current-percent]",
-						},
-						["name"] = {
-							["position"] = "TOPLEFT",
-							["text_format"] = "[name:medium]",
 						},
 						["height"] = 45,
 						["buffs"] = {
@@ -250,40 +181,16 @@ local profile = {
 							["numrows"] = 2,
 							["perrow"] = 7,
 						},
-						["castbar"] = {
-							["width"] = 191,
-						},
-					},
-					["raid40"] = {
-						["health"] = {
-							["text"] = true,
-						},
-						["power"] = {
-							["offset"] = 5,
-							["enable"] = true,
-						},
-						["width"] = 68,
-						["name"] = {
-							["text_format"] = "[namecolor][name:short]",
-						},
-						["height"] = 33,
-					},
-					["focus"] = {
-						["power"] = {
-							["offset"] = 4,
-						},
 						["name"] = {
 							["text_format"] = "[name:medium]",
-						},
-						["width"] = 115,
-						["castbar"] = {
-							["width"] = 115,
-						},
-						["raidicon"] = {
-							["enable"] = false,
+							["position"] = "TOPLEFT",
 						},
 					},
 					["target"] = {
+						["combobar"] = {
+							["height"] = 8,
+							["fill"] = "spaced",
+						},
 						["debuffs"] = {
 							["sizeOverride"] = 25,
 						},
@@ -292,11 +199,6 @@ local profile = {
 							["enable"] = true,
 							["camDistanceScale"] = 1.3,
 						},
-						['combobar'] = {
-							['enable'] = true,
-							['fill'] = 'spaced',
-							['height'] = 8,
-						},	
 						["power"] = {
 							["offset"] = 7,
 							["position"] = "BOTTOMLEFT",
@@ -308,7 +210,6 @@ local profile = {
 						["healPrediction"] = false,
 						["width"] = 235,
 						["health"] = {
-							["text_format"] = "[healthcolor][health:current-percent]",
 							["position"] = "TOPLEFT",
 						},
 						["castbar"] = {
@@ -326,23 +227,6 @@ local profile = {
 							["enable"] = false,
 						},
 					},
-					["arena"] = {
-						["health"] = {
-							["text_format"] = "[healthcolor][health:current-percent]",
-						},
-						["power"] = {
-							["offset"] = 7,
-							["text_format"] = "[powercolor][power:current]",
-						},
-						["width"] = 225,
-						["name"] = {
-							["text_format"] = "[namecolor][name:medium]",
-						},
-						["height"] = 45,
-						["castbar"] = {
-							["width"] = 225,
-						},
-					},
 					["party"] = {
 						["debuffs"] = {
 							["sizeOverride"] = 30,
@@ -350,76 +234,159 @@ local profile = {
 							["initialAnchor"] = "TOPLEFT",
 							["xOffset"] = 1,
 						},
-						["name"] = {
-							["position"] = "TOPLEFT",
-							["text_format"] = "[namecolor][name:medium]",
+						["roleIcon"] = {
+							["position"] = "BOTTOMLEFT",
 						},
 						["targetsGroup"] = {
 							["initialAnchor"] = "BOTTOM",
-						},	
-						['roleIcon'] = {
-							['enable'] = true,
-							['position'] = 'BOTTOMLEFT',
 						},
 						["power"] = {
 							["offset"] = 6,
 							["text_format"] = "",
 						},
 						["healPrediction"] = true,
-						["health"] = {
-							["text_format"] = "[healthcolor][health:current-percent]",
+						["name"] = {
+							["text_format"] = "[namecolor][name:medium]",
+							["position"] = "TOPLEFT",
 						},
 						["height"] = 45,
 						["petsGroup"] = {
 							["initialAnchor"] = "BOTTOM",
 						},
 					},
-					["pet"] = {
+					["raid40"] = {
 						["power"] = {
 							["offset"] = 5,
+							["enable"] = true,
 						},
-						["width"] = 110,
-						["name"] = {
-							["text_format"] = "[namecolor][name:medium]",
+						["width"] = 68,
+						["health"] = {
+							["text"] = true,
 						},
 						["height"] = 33,
 					},
+					["focus"] = {
+						["power"] = {
+							["offset"] = 4,
+						},
+						["width"] = 115,
+						["name"] = {
+							["text_format"] = "[name:medium]",
+						},
+						["castbar"] = {
+							["width"] = 115,
+						},
+						["raidicon"] = {
+							["enable"] = false,
+						},
+					},
+					["raid25"] = {
+						["power"] = {
+							["offset"] = 5,
+						},
+						["width"] = 68,
+						["health"] = {
+							["text_format"] = "[health:deficit]",
+						},
+					},
+					["arena"] = {
+						["power"] = {
+							["offset"] = 7,
+						},
+						["width"] = 225,
+						["health"] = {
+							["text_format"] = "[healthcolor][health:current-percent]",
+						},
+						["height"] = 45,
+						["castbar"] = {
+							["width"] = 225,
+						},
+					},
+					["player"] = {
+						["debuffs"] = {
+							["sizeOverride"] = 25,
+							["attachTo"] = "BUFFS",
+						},
+						["portrait"] = {
+							["overlay"] = true,
+							["enable"] = true,
+							["camDistanceScale"] = 1.3,
+						},
+						["classbar"] = {
+							["height"] = 5,
+							["fill"] = "filled",
+						},
+						["aurabar"] = {
+							["enable"] = false,
+						},
+						["restIcon"] = false,
+						["power"] = {
+							["offset"] = 7,
+							["position"] = "BOTTOMRIGHT",
+							["text_format"] = "",
+						},
+						["customTexts"] = {
+						},
+						["healPrediction"] = false,
+						["width"] = 235,
+						["health"] = {
+							["position"] = "TOPRIGHT",
+						},
+						["name"] = {
+							["text_format"] = "[namecolor][name:medium] [difficultycolor][level]",
+							["position"] = "TOPLEFT",
+						},
+						["height"] = 50,
+						["buffs"] = {
+							["sizeOverride"] = 25,
+							["enable"] = true,
+							["noDuration"] = false,
+							["attachTo"] = "FRAME",
+						},
+						["castbar"] = {
+							["width"] = 362,
+							["displayTarget"] = true,
+							["height"] = 21,
+						},
+					},
+					["assist"] = {
+						["enable"] = false,
+					},
 				},
 				["OORAlpha"] = 0.25,
-				["statusbar"] = "Flatt", -- This looks better.
+				["statusbar"] = "Flatt",
 				["colors"] = {
 					["auraBarBuff"] = {
-						["b"] = 0.1176470588235294,
-						["g"] = 0.1176470588235294,
 						["r"] = 0.1176470588235294,
+						["g"] = 0.1176470588235294,
+						["b"] = 0.1176470588235294,
 					},
 					["colorhealthbyvalue"] = false,
-					["healthclass"] = false,
-					['customhealthbackdrop'] = true,
+					["customhealthbackdrop"] = true,
 					["health_backdrop"] = {
-						["b"] = 0.1882352941176471,
-						["g"] = 0.1882352941176471,
 						["r"] = 0.1882352941176471,
+						["g"] = 0.1882352941176471,
+						["b"] = 0.1882352941176471,
 					},
 					["castColor"] = {
-						["b"] = 0.1019607843137255,
-						["g"] = 0.1019607843137255,
 						["r"] = 0.1019607843137255,
+						["g"] = 0.1019607843137255,
+						["b"] = 0.1019607843137255,
 					},
 					["castNoInterrupt"] = {
-						["r"] = 0.7803921568627451,
-						["g"] = 0.2509803921568627,
 						["b"] = 0.2509803921568627,
+						["g"] = 0.2509803921568627,
+						["r"] = 0.7803921568627451,
 					},
 					["health"] = {
-						["b"] = 0.09019607843137255,
-						["g"] = 0.09019607843137255,
 						["r"] = 0.09411764705882353,
+						["g"] = 0.09019607843137255,
+						["b"] = 0.09019607843137255,
 					},
 					["auraBarDebuff"] = {
-						["b"] = 0.2509803921568627,
-						["g"] = 0.2509803921568627,
 						["r"] = 0.7803921568627451,
+						["g"] = 0.2509803921568627,
+						["b"] = 0.2509803921568627,
 					},
 				},
 				["fontOutline"] = "OUTLINE",
@@ -446,25 +413,24 @@ local profile = {
 						["middle"] = "Spec Switch",
 					},
 					["RightMiniPanel"] = "Time",
-					["LeftChatTab_Datatext_Panel"] = "Spec Switch",
-					["Bottom_Datatext_Panel"] = {
-						["right"] = "Gold",
-						["left"] = "System",
-						["middle"] = "Time",
-					},
-					["RightChatTab_Datatext_Panel"] = "",
-					["RightChatTab_Datatext_Panel2"] = "",
 					["LeftChatDataPanel"] = {
 						["right"] = "Guild",
 						["left"] = "Friends",
 						["middle"] = "System",
 					},
+					["RightChatTab_Datatext_Panel"] = "",
+					["Bottom_Datatext_Panel"] = {
+						["right"] = "Gold",
+						["left"] = "System",
+						["middle"] = "Time",
+					},
+					["RightChatTab_Datatext_Panel2"] = "",
+					["LeftChatTab_Datatext_Panel"] = "Spec Switch",
 				},
-				["fontOutline"] = "NONE",
 				["bottomSize"] = 22,
 				["ldbTwoWidth"] = 88,
-				["ldbThree"] = false,
-				["topCenter"] = false,
+				["ldbOneDataPanel"] = 1,
+				["font"] = "Oswald Regular",
 				["enableTop"] = false,
 				["ldbTwoDataPanel"] = 1,
 				["ldbOneWidth"] = 88,
@@ -472,14 +438,14 @@ local profile = {
 				["bottomBar"] = true,
 				["ldbThreeDataPanel"] = 3,
 				["chatOffset"] = 4,
-				["font"] = "Oswald Regular", -- Font should load correctly now.
+				["ldbTwoMouseover"] = false,
 				["topWidth"] = 350,
+				["topCenter"] = false,
 				["moveChats"] = false,
 				["ldbOneMouseover"] = false,
-				["ldbTwoMouseover"] = false,
 				["ldbTwo"] = true,
 				["ldbOne"] = true,
-				["ldbOneDataPanel"] = 1,
+				["ldbThree"] = false,
 				["xpRep"] = false,
 				["leftChat"] = true,
 				["ldbThreeMouseover"] = false,
@@ -487,26 +453,13 @@ local profile = {
 				["rightChat"] = false,
 			},
 			["loclite"] = {
-				["dig"] = false,
-				["lpwidth"] = 100,
 				["dtheight"] = 18,
+				["lpwidth"] = 100,
+				["dig"] = false,
 				["customCoordsColor"] = 2,
 				["locpanel"] = false,
 			},
 			["layoutSet"] = "dpsMelee",
-			["auras"] = {
-				["fontSize"] = 12,
-				["font"] = "Oswald Regular",
-				["fontOutline"] = "OUTLINE", -- Forgot to add this
-				["consolidatedBuffs"] = {
-					["font"] = "Oswald Regular",
-					["filter"] = false,
-					["enable"] = false,
-					["durations"] = false,
-					["fontSize"] = 12,
-					["fontOutline"] = "OUTLINE", -- Forgot to add this
-				},
-			},
 			["actionbar"] = {
 				["bar3"] = {
 					["backdrop"] = true,
@@ -514,10 +467,7 @@ local profile = {
 					["buttonsize"] = 28,
 				},
 				["fontSize"] = 12,
-				["noRangeColor"] = {
-					["g"] = 0.1019607843137255,
-					["b"] = 0.1019607843137255,
-				},
+				["fontOutline"] = "OUTLINE",
 				["microbar"] = {
 					["enabled"] = true,
 					["mouseover"] = true,
@@ -538,7 +488,10 @@ local profile = {
 					["buttonsize"] = 28,
 				},
 				["font"] = "Oswald Regular",
-				["fontOutline"] = "OUTLINE",
+				["noRangeColor"] = {
+					["g"] = 0.1019607843137255,
+					["b"] = 0.1019607843137255,
+				},
 				["macrotext"] = true,
 				["stanceBar"] = {
 					["buttonspacing"] = 1,
@@ -550,9 +503,22 @@ local profile = {
 					["buttonsize"] = 25,
 				},
 				["bar4"] = {
+					["mouseover"] = true,
 					["buttonsPerRow"] = 2,
 					["buttonsize"] = 25,
-					["mouseover"] = true
+				},
+			},
+			["auras"] = {
+				["fontSize"] = 12,
+				["font"] = "Oswald Regular",
+				["fontOutline"] = "OUTLINE",
+				["consolidatedBuffs"] = {
+					["font"] = "Oswald Regular",
+					["filter"] = false,
+					["enable"] = false,
+					["fontOutline"] = "OUTLINE",
+					["durations"] = false,
+					["fontSize"] = 12,
 				},
 			},
 		},
