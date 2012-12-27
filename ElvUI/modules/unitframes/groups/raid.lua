@@ -114,7 +114,11 @@ for i=10, 40, 15 do
 		header:SetAttribute("maxColumns", db.maxColumns)
 		header:SetAttribute("unitsPerColumn", db.unitsPerColumn)
 		
-		header:SetAttribute('columnSpacing', db.columnSpacing)
+		if (db.point == "TOP" or db.point == "BOTTOM") and (db.columnAnchorPoint == "LEFT" or db.columnAnchorPoint == "RIGHT") then
+			header:SetAttribute('columnSpacing', db.xOffset)
+		else
+			header:SetAttribute('columnSpacing', db.yOffset)
+		end
 		header:SetAttribute("xOffset", db.xOffset)	
 		header:SetAttribute("yOffset", db.yOffset)
 
@@ -128,7 +132,7 @@ for i=10, 40, 15 do
 		if not header.positioned then
 			header:ClearAllPoints()
 			header:Point("BOTTOMLEFT", E.UIParent, "BOTTOMLEFT", 4, 195)	
-			E:CreateMover(header, header:GetName()..'Mover', L['Raid 1-']..i..' Frames', nil, nil, nil, 'ALL,RAID'..i)
+			E:CreateMover(header, header:GetName()..'Mover', L['Raid 1-']..i..L[' Frames'], nil, nil, nil, 'ALL,RAID'..i)
 			
 			header:SetAttribute('minHeight', header.dirtyHeight)
 			header:SetAttribute('minWidth', header.dirtyWidth)
@@ -392,7 +396,7 @@ for i=10, 40, 15 do
 				frame:EnableElement('RaidDebuffs')				
 
 				rdebuffs:Size(db.rdebuffs.size)
-				
+				rdebuffs:Point('BOTTOM', frame, 'BOTTOM', db.rdebuffs.xOffset, db.rdebuffs.yOffset)
 				rdebuffs.count:FontTemplate(nil, db.rdebuffs.fontSize, 'OUTLINE')
 				rdebuffs.time:FontTemplate(nil, db.rdebuffs.fontSize, 'OUTLINE')
 			else
@@ -506,6 +510,7 @@ for i=10, 40, 15 do
 		frame:UpdateAllElements()
 		
 		if db.customTexts then
+			local customFont = UF.LSM:Fetch("font", objectDB.font or UF.db.font)
 			for objectName, _ in pairs(db.customTexts) do
 				if not frame[objectName] then
 					frame[objectName] = frame.RaisedElementParent:CreateFontString(nil, 'OVERLAY')
@@ -514,7 +519,7 @@ for i=10, 40, 15 do
 				local objectDB = db.customTexts[objectName]
 				UF:CreateCustomTextGroup('raid'..i, objectName)
 				
-				frame[objectName]:FontTemplate(UF.LSM:Fetch("font", objectDB.font or UF.db.font), objectDB.size or UF.db.fontSize, objectDB.fontOutline or UF.db.fontOutline)
+				frame[objectName]:FontTemplate(customFont, objectDB.size or UF.db.fontSize, objectDB.fontOutline or UF.db.fontOutline)
 				frame:Tag(frame[objectName], objectDB.text_format or '')
 				frame[objectName]:SetJustifyH(objectDB.justifyH or 'CENTER')
 			frame[objectName]:ClearAllPoints()
