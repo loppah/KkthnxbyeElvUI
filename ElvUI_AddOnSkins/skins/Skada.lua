@@ -52,7 +52,7 @@ local function SkinSkada(self)
 			skada.button:SetBackdrop(titleBG)
 		end
 
-		skada:SetTexture(AS.LSM:Fetch("statusbar",E.private.general.normTex))
+		skada:SetTexture(E["media"].normTex)
 		skada:SetSpacing(barSpacing)
 		skada:SetFrameLevel(5)
 		
@@ -71,7 +71,7 @@ local function SkinSkada(self)
 		win.bargroup.button:SetBackdropColor(unpack(E["media"].backdropcolor))
 		skada:SetBackdrop(nil)
 		if not skada.backdrop then
-			skada:CreateBackdrop("Transparent")
+			skada:CreateBackdrop("Default")
 		end
 		skada.backdrop:ClearAllPoints()
 		if(win.db.enabletitle) then
@@ -85,7 +85,7 @@ local function SkinSkada(self)
 			win.bargroup.button:SetFrameStrata("HIGH")
 			win.bargroup.button:SetFrameLevel(5)	
 			win.bargroup:SetFrameStrata("HIGH")
-			if (AS:CheckOption("EmbedRight") and RightChatPanel or LeftChatPanel) then win.bargroup:SetParent((AS:CheckOption("EmbedRight") and RightChatPanel or LeftChatPanel)) end
+			if RightChatPanel then win.bargroup:SetParent(RightChatPanel) end
 		end
 	end
 
@@ -122,7 +122,7 @@ local function SkinSkada(self)
 	end
 
 	if(AS:CheckOption("EmbedSkada")) then
-		hooksecurefunc((AS:CheckOption("EmbedRight") and RightChatPanel or LeftChatPanel), "SetSize", function(self, width, height) AS:EmbedSkada() end)
+		hooksecurefunc(RightChatPanel, "SetSize", function(self, width, height) AS:EmbedSkada() end)
 		AS:EmbedSkada()
 	end
 end

@@ -38,7 +38,7 @@ function AS:EmbedOmen()
 		OmenAnchor:ClearAllPoints()
 		OmenBarList:SetPoint("TOPLEFT", EmbeddingWindow, "TOPLEFT", 0, 0)
 		OmenBarList:SetPoint("BOTTOMRIGHT", EmbeddingWindow, "BOTTOMRIGHT", 0, 2)
-		if (AS:CheckOption("EmbedRight") and RightChatPanel or LeftChatPanel) then OmenBarList:SetParent((AS:CheckOption("EmbedRight") and RightChatPanel or LeftChatPanel)) end
+		if RightChatPanel then OmenBarList:SetParent(RightChatPanel) end
 		OmenBarList:SetFrameStrata("HIGH")
 end
 
@@ -49,7 +49,7 @@ local function SkinOmen(self)
 	Omen.UpdateBarTextureSettings_ = Omen.UpdateBarTextureSettings
 	Omen.UpdateBarTextureSettings = function(self)
 		for i, v in ipairs(self.Bars) do
-			v.texture:SetTexture(AS.LSM:Fetch("statusbar",E.private.general.normTex))
+			v.texture:SetTexture(E["media"].normTex)
 		end
 	end
 
