@@ -12,8 +12,6 @@ E:RegisterAddon("ElvUI_AddOnSkins", true)
 E:RegisterAddon("ElvUI_LocLite", true)
 E:RegisterAddon("ElvUI_VisualAuraTimers", true)
 
-E:RegisterAddon("gBags", true)
-E:RegisterAddon("HydraChat", true)
 E:RegisterAddon("OzCooldowns", true)
 E:RegisterAddon("SimpleILevel", true)
 
@@ -23,4 +21,3 @@ E:RegisterAddon("SkadaHealing", true)
 
 E:RegisterAddon("SquareMinimapButtons", true)
 E:RegisterAddon("stAddonManager", true)
-E:RegisterAddon("xCT+", true)
