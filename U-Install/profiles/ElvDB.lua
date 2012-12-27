@@ -54,7 +54,7 @@ local profile = {
 			},
 			["movers"] = {
 				["BottomBarMover"] = "BOTTOMElvUIParentBOTTOM01",
-				["PetAB"] = "BOTTOMRIGHTElvUIParentBOTTOMRIGHT-84169",
+				["PetAB"] = "BOTTOMRIGHTElvUIParentBOTTOMRIGHT-86167",
 				["LocationLiteMover"] = "TOPElvUIParentTOP0-4",
 				["GMMover"] = "TOPLEFTElvUIParentTOPLEFT169-4",
 				["BossButton"] = "BOTTOMElvUIParentBOTTOM0355",
