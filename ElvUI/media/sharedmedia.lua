@@ -18,4 +18,3 @@ LSM:Register("statusbar","ElvUI Gloss", [[Interface\AddOns\ElvUI\media\textures\
 LSM:Register("statusbar","ElvUI Norm", [[Interface\AddOns\ElvUI\media\textures\normTex2.tga]])
 LSM:Register("statusbar","Minimalist", [[Interface\AddOns\ElvUI\media\textures\Minimalist.tga]])
 LSM:Register("statusbar","Flatt", [[Interface\AddOns\ElvUI\media\textures\flatt.tga]])
-
