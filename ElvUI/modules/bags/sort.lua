@@ -3,20 +3,20 @@ local B = E:GetModule('Bags');
 
 local bankBags = {BANK_CONTAINER}
 for i = NUM_BAG_SLOTS + 1, NUM_BAG_SLOTS + NUM_BANKBAGSLOTS do
-	bankBags[#bankBags + 1] = i
+	table.insert(bankBags, i)
 end
 
 local playerBags = {}
 for i = 0, NUM_BAG_SLOTS do
-	playerBags[#playerBags + 1] = i
+	table.insert(playerBags, i)
 end
 
 local allBags = {}
 for _,i in ipairs(playerBags) do
-	allBags[#allBags + 1] = i
+	table.insert(allBags, i)
 end
 for _,i in ipairs(bankBags) do
-	allBags[#allBags + 1] = i
+	table.insert(allBags, i)
 end
 
 local coreGroups = {
@@ -382,7 +382,7 @@ function B.Stack(sourceBags, targetBags, canMove)
 		local itemID = bagIDs[bagSlot]
 		if itemID and (bagStacks[bagSlot] ~= bagMaxStacks[bagSlot]) then
 			targetItems[itemID] = (targetItems[itemID] or 0) + 1
-			targetSlots[#targetSlots + 1] = bagSlot
+			table.insert(targetSlots, bagSlot)
 		end
 	end
 
@@ -421,9 +421,9 @@ function B.Sort(bags, sorter, invertDirection)
 	for i, bag, slot in B.IterateBags(bags, nil, 'both') do
 		local bagSlot = B:Encode_BagSlot(bag, slot)
 		initialOrder[bagSlot] = i
-		bagSorted[#bagSorted + 1] = bagSlot
+		table.insert(bagSorted, bagSlot)
 	end	
-
+	
 	table.sort(bagSorted, sorter)
 
 	local passNeeded = true
@@ -457,7 +457,7 @@ function B.FillBags(from, to)
 	B.Stack(from, to)
 	for _, bag in ipairs(to) do
 		if B:IsSpecialtyBag(bag) then
-			specialtyBags[#specialtyBags + 1] = bag
+			table.insert(specialtyBags, bag)
 		end
 	end
 	if #specialtyBags > 0 then
@@ -474,7 +474,7 @@ function B.Fill(sourceBags, targetBags, reverse, canMove)
 	for _, bag, slot in B.IterateBags(targetBags, reverse, "deposit") do
 		local bagSlot = B:Encode_BagSlot(bag, slot)
 		if not bagIDs[bagSlot] then
-			emptySlots[#emptySlots + 1] = bagSlot
+			table.insert(emptySlots, bagSlot)
 		end
 	end
 
@@ -496,7 +496,7 @@ function B.SortBags(...)
 			local bagType = B:IsSpecialtyBag(slotNum)
 			if bagType == false then bagType = 'Normal' end
 			if not bagCache[bagType] then bagCache[bagType] = {} end
-			bagCache[bagType][#bagCache[bagType] + 1] = slotNum
+			table.insert(bagCache[bagType], slotNum)
 		end	
 
 		for bagType, sortedBags in pairs(bagCache) do
@@ -636,7 +636,7 @@ function B:GetGroup(id)
 	if string.match(id, "^[-%d,]+$") then
 		local bags = {}
 		for b in string.gmatch(id, "-?%d+") do
-			bags[#bags + 1] = tonumber(b)
+			table.insert(bags, tonumber(b))
 		end
 		return bags
 	end
@@ -659,7 +659,7 @@ function B:CommandDecorator(func, groupsDefaults)
 		for bags in (groups or ""):gmatch("[^%s]+") do
 			bags = B:GetGroup(bags)
 			if bags then
-				bagGroups[#bagGroups + 1] = bags
+				table.insert(bagGroups, bags)
 			end
 		end
 

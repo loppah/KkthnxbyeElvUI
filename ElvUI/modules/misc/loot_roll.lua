@@ -169,7 +169,7 @@ local function GetFrame()
 	else
 		f:Point("BOTTOM", next(M.RollBars) and M.RollBars[#M.RollBars] or AlertFrameHolder, "TOP", 0, 4)
 	end
-	M.RollBars[#M.RollBars + 1] = f
+	table.insert(M.RollBars, f)
 	return f
 end
 

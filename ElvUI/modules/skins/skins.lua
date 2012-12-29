@@ -399,7 +399,7 @@ function S:RegisterSkin(name, loadFunc, forceLoad, bypass)
 		loadFunc()
 		self.addonsToLoad[name] = nil;		
 	elseif name == 'ElvUI' then
-		self.nonAddonsToLoad[#self.nonAddonsToLoad + 1] = loadFunc
+		tinsert(self.nonAddonsToLoad, loadFunc)
 	else
 		self.addonsToLoad[name] = loadFunc;
 	end

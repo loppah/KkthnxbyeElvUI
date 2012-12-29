@@ -1,7 +1,6 @@
 local E, L, V, P, G, _ = unpack(select(2, ...)); --Inport: Engine, Locales, PrivateDB, ProfileDB, GlobalDB, Localize Underscore
 local UF = E:GetModule('UnitFrames');
 local LSM = LibStub("LibSharedMedia-3.0");
-local LSR = LibStub("LibSpecRoster-1.0")
 
 function UF:SpawnMenu()
 	local unit = E:StringTitle(self.unit)
@@ -397,7 +396,6 @@ end
 function UF:Construct_DruidResourceBar(frame)
 	local eclipseBar = CreateFrame('Frame', nil, frame)
 	eclipseBar:CreateBackdrop('Default')
-	eclipseBar.EclipseUpdate = UF.PredictEclipse	
 	eclipseBar.PostUpdatePower = UF.EclipseDirection
 	eclipseBar.PostUpdateVisibility = UF.DruidResourceBarVisibilityUpdate
 	
@@ -414,8 +412,7 @@ function UF:Construct_DruidResourceBar(frame)
 	eclipseBar.SolarBar = solarBar
 	
 	eclipseBar.Text = lunarBar:CreateFontString(nil, 'OVERLAY')
-	eclipseBar.Text:SetFont([[Interface\AddOns\ElvUI\media\fonts\Continuum_Medium.ttf]], 18, 'OUTLINE')
-	--UF:Configure_FontString(eclipseBar.Text)
+	UF:Configure_FontString(eclipseBar.Text)
 	eclipseBar.Text:SetPoint("CENTER", lunarBar:GetStatusBarTexture(), "RIGHT")
 	
 	return eclipseBar

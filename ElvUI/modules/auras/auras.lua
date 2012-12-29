@@ -2,72 +2,42 @@ local E, L, V, P, G, _ = unpack(select(2, ...)); --Inport: Engine, Locales, Priv
 local A = E:NewModule('Auras', 'AceHook-3.0', 'AceEvent-3.0');
 local LSM = LibStub("LibSharedMedia-3.0")
 
-local DAY, HOUR, MINUTE = 86400, 3600, 60 --used for formatting text
-local DAYISH, HOURISH, MINUTEISH = 3600 * 23.5, 60 * 59.5, 59.5 --used for formatting text at transition points
-local HALFDAYISH, HALFHOURISH, HALFMINUTEISH = DAY/2 + 0.5, HOUR/2 + 0.5, MINUTE/2 + 0.5 --used for calculating next update times
-
-local ceil = math.ceil
-local max = math.max
-local find = string.find
-
-function A:FormatTime(s, short)
-	if s >= DAY then
-		return format("|cffeeeeee%dd|r", ceil(s / DAY))
-	elseif s >= HOUR then
-		return format("|cffeeeeee%dh|r", ceil(s / HOUR))
-	elseif s >= MINUTE then
-		return format("|cffeeeeee%dm|r", ceil(s / MINUTE))
-	elseif s > E.db.auras.fadeThreshold then
-		return format(short and "%d" or "%ds", floor(s))
+function A:FormatTime(s)
+	local day, hour, minute = 86400, 3600, 60
+	if s >= day then
+		return format("|cffeeeeee%dd|r", ceil(s / day))
+	elseif s >= hour then
+		return format("|cffeeeeee%dh|r", ceil(s / hour))
+	elseif s >= minute then
+		return format("|cffeeeeee%dm|r", ceil(s / minute))
+	elseif s >= minute / 12 and s > E.db.auras.fadeThreshold then
+		return tostring(floor(s))..'s'
 	end
-	return format(short and "%.1f" or "%.1fs", s)
-end
-
-function A:AuraTimeGetText(s, short)
-	--format text as seconds when below a minute
-	if s < MINUTEISH then
-		if s >= E.db.auras.fadeThreshold then
-			return A:FormatTime(s, short), 0.51
-		else
-			return A:FormatTime(s, short), 0.051
-		end
-	--format text as minutes when below an hour
-	elseif s < HOURISH then
-		local minutes = tonumber(E:Round(s/MINUTE))
-		return A:FormatTime(s, short), minutes > 1 and (s - (minutes*MINUTE - HALFMINUTEISH)) or (s - MINUTEISH)
-	--format text as hours when below a day
-	elseif s < DAYISH then
-		local hours = tonumber(E:Round(s/HOUR))
-		return A:FormatTime(s, short), hours > 1 and (s - (hours*HOUR - HALFHOURISH)) or (s - HOURISH)
-	--format text as days
-	else
-		local days = tonumber(E:Round(s/DAY))
-		return A:FormatTime(s, short),  days > 1 and (s - (days*DAY - HALFDAYISH)) or (s - DAYISH)
-	end
+	return format("%.1fs", s)
 end
 
 function A:UpdateTime(elapsed)
-	self.expiration = self.expiration - elapsed
-	if self.nextupdate > 0 then
-		self.nextupdate = self.nextupdate - elapsed
-		return
+	if(self.expiration) then	
+		self.expiration = math.max(self.expiration - elapsed, 0)
+		if(self.expiration <= 0) then
+			self.time:SetText("")
+		else
+			local time = A:FormatTime(self.expiration)
+			if self.expiration <= 86400.5 and self.expiration > 3600.5 then
+				self.time:SetText("|cffcccccc"..time.."|r")
+				E:StopFlash(self)
+			elseif self.expiration <= 3600.5 and self.expiration > 60.5 then
+				self.time:SetText("|cffcccccc"..time.."|r")
+				E:StopFlash(self)
+			elseif self.expiration <= 60.5 and self.expiration > E.db.auras.fadeThreshold then
+				self.time:SetText("|cffcccccc"..time.."|r")
+				E:StopFlash(self)
+			elseif self.expiration <= E.db.auras.fadeThreshold then
+				self.time:SetText("|cffff0000"..time.."|r")
+				E:Flash(self, 1)
+			end
+		end
 	end
-	
-	if(self.expiration <= 0) then
-		self.time:SetText("")
-		self:SetScript("OnUpdate", nil)
-		return
-	end
-
-	local formattedTime, nextUpdate = A:AuraTimeGetText(self.expiration, false)
-	if self.expiration > E.db.auras.fadeThreshold then
-		self.time:SetFormattedText("|cffcccccc%s|r", formattedTime)
-		E:StopFlash(self)
-	else
-		self.time:SetFormattedText("|cffff0000%s|r", formattedTime)
-		E:Flash(self, 1)
-	end
-	self.nextupdate = nextUpdate
 end
 
 function A:UpdateWeapon(button)
@@ -106,6 +76,8 @@ function A:UpdateAuras(header, button)
 		button.time = button:CreateFontString(nil, "ARTWORK")
 		button.time:SetPoint("TOP", button, 'BOTTOM', 0, -2)
 		button.time:FontTemplate()--safty
+
+		button:SetScript("OnUpdate", A.UpdateTime)
 		
 		button:CreateBackdrop('Default')
 
@@ -126,8 +98,6 @@ function A:UpdateAuras(header, button)
 		button.texture:SetTexCoord(unpack(E.TexCoords))
 		button.count:SetText(count > 1 and count or "")
 		button.expiration = expiration - GetTime()
-		button.nextupdate = 0
-		button:SetScript("OnUpdate", A.UpdateTime)
 		
 		if(header:GetAttribute("filter") == "HARMFUL") then
 			local color = DebuffTypeColor[dtype] or DebuffTypeColor.none
@@ -221,7 +191,7 @@ function A:PostDrag(position)
 	for _, header in pairs(headers) do
 		if header then
 			if not position then position = E:GetScreenQuadrant(header) end
-			if find(position, "LEFT") then
+			if string.find(position, "LEFT") then
 				header:SetAttribute("point", "TOPLEFT")
 				header:SetAttribute("xOffset", (E.private.auras.size + (E.PixelMode and 6 or 10)))
 			else
@@ -233,7 +203,7 @@ function A:PostDrag(position)
 		end
 	end
 	
-	if find(position, "LEFT") then
+	if string.find(position, "LEFT") then
 		ElvUIPlayerBuffs:Point("TOPLEFT", AurasHolder, "TOPLEFT", 2, -2)
 		
 		if ElvUIPlayerDebuffs then
@@ -250,7 +220,7 @@ end
 
 function A:WeaponPostDrag(point)
 	if not point then point = E:GetScreenQuadrant(self) end
-	if find(point, "LEFT") then
+	if string.find(point, "LEFT") then
 		TempEnchant1:ClearAllPoints()
 		TempEnchant2:ClearAllPoints()
 		TempEnchant1:SetPoint("TOPLEFT", self, "TOPLEFT", 0, 0)

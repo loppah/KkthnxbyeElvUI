@@ -1,10 +1,6 @@
 local E, L, V, P, G, _ = unpack(select(2, ...)); --Inport: Engine, Locales, PrivateDB, ProfileDB, GlobalDB, Localize Underscore
 local NP = E:GetModule('NamePlates')
 
-local ceil = math.ceil
-local wipe = table.wipe
-local band = bit.band
-
 --[[
 	This file handles functions for the Castbar and Debuff modules of nameplates.
 ]]
@@ -229,6 +225,7 @@ function NP:UpdateAuraContext(frame)
 		if guid and raidicon then ByRaidIcon[raidicon] = guid end
 	end
 	
+	
 	local frame = NP:SearchForFrame(guid, raidicon, parent.hp.name:GetText())
 	if frame then
 		NP:UpdateDebuffs(frame)
@@ -274,13 +271,18 @@ end
 function NP:SearchNameplateByIcon(UnitFlags)
 	local UnitIcon
 	for iconname, bitmask in pairs(NP.RaidTargetReference) do
-		if band(UnitFlags, bitmask) > 0  then
+		if bit.band(UnitFlags, bitmask) > 0  then
 			UnitIcon = iconname
 			break
 		end
 	end	
 
-	return NP:SearchNameplateByIconName(UnitIcon)
+	for frame, _ in pairs(NP.Handled) do
+		frame = _G[frame]:GetChildren()
+		if frame and frame:IsShown() and frame.isMarked and (frame.raidIconType == UnitIcon) then
+			return frame
+		end
+	end	
 end
 
 function NP:SearchNameplateByIconName(raidicon)
@@ -309,11 +311,10 @@ function NP:SetAuraInstance(guid, spellid, expiration, stacks, caster, duration,
 		filter = true;
 	end
 
-	local trackFilter = E.global['unitframe']['aurafilters'][self.db.trackfilter]
-	if self.db.trackfilter and #self.db.trackfilter > 1 and trackFilter then
+	if self.db.trackfilter and #self.db.trackfilter > 1 and E.global['unitframe']['aurafilters'][self.db.trackfilter] then
 		local name = GetSpellInfo(spellid)
-		local spellList = trackFilter.spells
-		local type = trackFilter.type
+		local spellList = E.global['unitframe']['aurafilters'][self.db.trackfilter].spells
+		local type = E.global['unitframe']['aurafilters'][self.db.trackfilter].type
 		if type == 'Blacklist' then
 			if spellList[name] and spellList[name].enable then
 				filter = false;
@@ -417,11 +418,11 @@ function NP:COMBAT_LOG_EVENT_UNFILTERED(_, _, event, ...)
 		local FoundPlate = nil;
 
 		if not (castTime > 0) then return end		
-		if band(sourceFlags, COMBATLOG_OBJECT_REACTION_HOSTILE) > 0 then 
-			if band(sourceFlags, COMBATLOG_OBJECT_CONTROL_PLAYER) > 0 then 
+		if bit.band(sourceFlags, COMBATLOG_OBJECT_REACTION_HOSTILE) > 0 then 
+			if bit.band(sourceFlags, COMBATLOG_OBJECT_CONTROL_PLAYER) > 0 then 
 				--	destination plate, by name
 				FoundPlate = NP:SearchNameplateByName(sourceName)
-			elseif band(sourceFlags, COMBATLOG_OBJECT_CONTROL_NPC) > 0 then 
+			elseif bit.band(sourceFlags, COMBATLOG_OBJECT_CONTROL_NPC) > 0 then 
 				--	destination plate, by GUID
 				FoundPlate = NP:SearchNameplateByGUID(sourceGUID)
 				if not FoundPlate then 
@@ -448,11 +449,11 @@ function NP:COMBAT_LOG_EVENT_UNFILTERED(_, _, event, ...)
 	elseif event == "SPELL_CAST_FAILED" or event == "SPELL_INTERRUPT" or event == "SPELL_CAST_SUCCESS" or event == "SPELL_HEAL" then
 		local FoundPlate = nil;
 		if sourceGUID == UnitGUID('player') and event == "SPELL_CAST_FAILED" then return; end
-		if band(sourceFlags, COMBATLOG_OBJECT_REACTION_HOSTILE) > 0 then 
-			if band(sourceFlags, COMBATLOG_OBJECT_CONTROL_PLAYER) > 0 then 
+		if bit.band(sourceFlags, COMBATLOG_OBJECT_REACTION_HOSTILE) > 0 then 
+			if bit.band(sourceFlags, COMBATLOG_OBJECT_CONTROL_PLAYER) > 0 then 
 				--	destination plate, by name
 				FoundPlate = NP:SearchNameplateByName(sourceName)
-			elseif band(sourceFlags, COMBATLOG_OBJECT_CONTROL_NPC) > 0 then 
+			elseif bit.band(sourceFlags, COMBATLOG_OBJECT_CONTROL_NPC) > 0 then 
 				--	destination plate, by GUID
 				FoundPlate = NP:SearchNameplateByGUID(sourceGUID)
 				if not FoundPlate then 
@@ -470,11 +471,11 @@ function NP:COMBAT_LOG_EVENT_UNFILTERED(_, _, event, ...)
 			NP:StopCastAnimation(FoundPlate)
 		end		
 	else
-		if band(sourceFlags, COMBATLOG_OBJECT_REACTION_HOSTILE) > 0 then 
-			if band(sourceFlags, COMBATLOG_OBJECT_CONTROL_PLAYER) > 0 then 
+		if bit.band(sourceFlags, COMBATLOG_OBJECT_REACTION_HOSTILE) > 0 then 
+			if bit.band(sourceFlags, COMBATLOG_OBJECT_CONTROL_PLAYER) > 0 then 
 				--	destination plate, by name
 				FoundPlate = NP:SearchNameplateByName(sourceName)
-			elseif band(sourceFlags, COMBATLOG_OBJECT_CONTROL_NPC) > 0 then 
+			elseif bit.band(sourceFlags, COMBATLOG_OBJECT_CONTROL_NPC) > 0 then 
 				--	destination plate, by raid icon
 				FoundPlate = NP:SearchNameplateByIcon(sourceRaidFlags) 
 			else 
@@ -490,18 +491,18 @@ function NP:COMBAT_LOG_EVENT_UNFILTERED(_, _, event, ...)
 	end
 
 	if event == "SPELL_AURA_APPLIED" or event == "SPELL_AURA_REFRESH" or event == "SPELL_AURA_APPLIED_DOSE" or event == "SPELL_AURA_REMOVED_DOSE" or event == "SPELL_AURA_BROKEN" or event == "SPELL_AURA_BROKEN_SPELL" or event == "SPELL_AURA_REMOVED" then
-		if (band(destFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0) and auraType == 'DEBUFF' then		
+		if (bit.band(destFlags, COMBATLOG_OBJECT_REACTION_FRIENDLY) == 0) and auraType == 'DEBUFF' then		
 			NP:UpdateAuraByLookup(destGUID)
 			local name, raidicon
 			-- Cache Unit Name for alternative lookup strategy
-			if band(destFlags, COMBATLOG_OBJECT_CONTROL_PLAYER) > 0 then 
+			if bit.band(destFlags, COMBATLOG_OBJECT_CONTROL_PLAYER) > 0 then 
 				local rawName = strsplit("-", destName)			-- Strip server name from players
 				NP.ByName[rawName] = destGUID
 				name = rawName
 			end
 			-- Cache Raid Icon Data for alternative lookup strategy
 			for iconname, bitmask in pairs(NP.RaidTargetReference) do
-				if band(destRaidFlags, bitmask) > 0  then
+				if bit.band(destRaidFlags, bitmask) > 0  then
 					NP.ByRaidIcon[iconname] = destGUID
 					raidicon = iconname
 					break
@@ -537,7 +538,7 @@ function NP:UpdateCastInfo(event, ignoreInt)
 	end
 	
 	local GUID = UnitGUID(unit)
-	if not GUID then return end
+	if not GUID then return; end
 
 	if not ignoreInt then
 		NP:UpdateAurasByUnitID(unit)
@@ -591,13 +592,13 @@ end
 function NP:UpdateRoster()
 	local groupType, groupSize, unitId, unitName
 	if IsInRaid() then 
-		groupType = "raid%d"
+		groupType = "raid"
 		groupSize = GetNumGroupMembers() - 1
 	elseif IsInGroup() then 
-		groupType = "party%d"
+		groupType = "party"
 		groupSize = GetNumGroupMembers(LE_PARTY_CATEGORY_HOME) 
 	else 
-		groupType = "solo%d"
+		groupType = "solo"
 		groupSize = 1
 	end
 	
@@ -606,7 +607,7 @@ function NP:UpdateRoster()
 	-- Cycle through Group
 	if groupType then
 		for index = 1, groupSize do
-			unitId = groupType:format(index	)
+			unitId = groupType..index	
 			unitName = UnitName(unitId)
 			if unitName then
 				self.GroupMembers[unitName] = unitId
@@ -647,7 +648,16 @@ end
 function NP:GetAuraInstance(guid, aura_id)
 	if guid and aura_id then
 		local aura_instance_id = guid..aura_id
-		return self.Aura_Spellid[aura_instance_id], self.Aura_Expiration[aura_instance_id], self.Aura_Stacks[aura_instance_id], self.Aura_Caster[aura_instance_id], self.Aura_Duration[aura_instance_id], self.Aura_Texture[aura_instance_id], self.Aura_Type[aura_instance_id], self.Aura_Target[aura_instance_id]
+		local spellid, expiration, stacks, caster, duration, texture, auratype
+		spellid = self.Aura_Spellid[aura_instance_id]
+		expiration = self.Aura_Expiration[aura_instance_id]
+		stacks = self.Aura_Stacks[aura_instance_id]
+		caster = self.Aura_Caster[aura_instance_id]
+		duration = self.Aura_Duration[aura_instance_id]
+		texture = self.Aura_Texture[aura_instance_id]
+		auratype  = self.Aura_Type[aura_instance_id]
+		auratarget  = self.Aura_Target[aura_instance_id]
+		return spellid, expiration, stacks, caster, duration, texture, auratype, auratarget
 	end
 end
 
@@ -744,7 +754,8 @@ end
 
 function NP:UpdateAurasByUnitID(unit)
 	-- Limit to enemies, for now
-	local unitType = UnitIsFriend("player", unit) and AURA_TARGET_FRIENDLY or AURA_TARGET_HOSTILE
+	local unitType
+	if UnitIsFriend("player", unit) then unitType = AURA_TARGET_FRIENDLY else unitType = AURA_TARGET_HOSTILE end	
 	if unitType == AURA_TARGET_FRIENDLY then return end		-- Filter
 	
 	-- Check the units Debuffs
