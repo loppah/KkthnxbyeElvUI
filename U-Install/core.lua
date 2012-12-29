@@ -105,6 +105,7 @@ function E:Install(force)
   -- Save the backups for later
   C.Backups = backups
   
+  
   -- Load the addons if we need to
   for index = 1,GetNumAddOns() do
     local name, title, notes, enabled, loadable, reason, security = GetAddOnInfo(index)
