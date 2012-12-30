@@ -48,10 +48,18 @@ local UPDATE_VISIBILITY = function(self, event)
 
 	if(showBar) then
 		eb:Show()
+		eb.callbackid = LibBalancePowerTracker:RegisterCallback(function(energy, direction, virtual_energy, virtual_direction, virtual_eclipse)
+			if (eb.EclipseUpdate) then
+				return eb:EclipseUpdate(eb, energy, direction, virtual_energy, virtual_direction, virtual_eclipse)
+			end		 
+		 end)
 	else
+		if (eb.callbackid) then
+			LibBalancePowerTracker:UnregisterCallback(eb.callbackid)
+		end
 		eb:Hide()
 	end
-
+	
 	if(eb.PostUpdateVisibility) then
 		return eb:PostUpdateVisibility(self.unit)
 	end

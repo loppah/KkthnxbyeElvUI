@@ -88,10 +88,7 @@ function E:UIFrameFade_OnUpdate(elapsed)
 		frame = FADEFRAMES[index];
 		fadeInfo = FADEFRAMES[index].fadeInfo;
 		-- Reset the timer if there isn't one, this is just an internal counter
-		if ( not fadeInfo.fadeTimer ) then
-			fadeInfo.fadeTimer = 0;
-		end
-		fadeInfo.fadeTimer = fadeInfo.fadeTimer + elapsed;
+		fadeInfo.fadeTimer = (fadeInfo.fadeTimer or 0) + elapsed;
 
 		-- If the fadeTimer is less then the desired fade time then set the alpha otherwise hold the fade state, call the finished function, or just finish the fade 
 		if ( fadeInfo.fadeTimer < fadeInfo.timeToFade ) then
@@ -164,7 +161,7 @@ function E:UIFrameFade(frame, fadeInfo)
 		end
 		index = index + 1;
 	end
-	tinsert(FADEFRAMES, frame);
+	FADEFRAMES[#FADEFRAMES + 1] = frame
 	frameFadeManager:SetScript("OnUpdate", E.UIFrameFade_OnUpdate);
 end
 
@@ -193,6 +190,7 @@ function E:tDeleteItem(table, item)
 	while table[index] do
 		if ( item == table[index] ) then
 			tremove(table, index);
+			break;
 		else
 			index = index + 1;
 		end

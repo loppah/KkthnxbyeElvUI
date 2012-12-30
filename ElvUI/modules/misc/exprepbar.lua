@@ -1,6 +1,12 @@
 local E, L, V, P, G, _ = unpack(select(2, ...)); --Inport: Engine, Locales, PrivateDB, ProfileDB, GlobalDB, Localize Underscore
 local M = E:GetModule('Misc');
 
+local find				= string.find
+local gsub				= string.gsub
+local incpat 			= gsub(gsub(FACTION_STANDING_INCREASED, "(%%s)", "(.+)"), "(%%d)", "(.+)")
+local changedpat	= gsub(gsub(FACTION_STANDING_CHANGED, "(%%s)", "(.+)"), "(%%d)", "(.+)")
+local decpat			= gsub(gsub(FACTION_STANDING_DECREASED, "(%%s)", "(.+)"), "(%%d)", "(.+)")
+
 FACTION_STANDING_LABEL100 = UNKNOWN
 
 function M:UpdateExpRepAnchors()
@@ -76,44 +82,50 @@ function M:UpdateExperience(event)
 	self:UpdateExpRepAnchors()
 end
 
+function M:GetWatchedFactionInformation()
+	local faction = GetWatchedFactionInfo()
+	if faction then
+		if faction == GUILD then
+			faction = GetGuildInfo("player")
+		end
+		
+		for factionIndex = 1, GetNumFactions() do
+			local name, _, standingID, barMin, barMax, barValue = GetFactionInfo(factionIndex)
+			if name == faction then
+				return true, name, standingID, barMin, barMax, barValue
+			end
+		end
+	end
+	
+	return false 
+end
+
 function M:UpdateReputation(event)
 	local bar = self.repBar
 	
-	local ID = 100
-	local name, reaction, min, max, value = GetWatchedFactionInfo()
-	local numFactions = GetNumFactions();
-
-	if not name then
+	local isWatched, name, standingID, barMin, barMax, barValue = self.GetWatchedFactionInformation()
+	if not isWatched then
 		bar:Hide()
 	else
 		bar:Show()
 
-		local text = ''
-		local textFormat = E.db.general.reputation.textFormat		
-		local color = FACTION_BAR_COLORS[reaction]
+		local color = FACTION_BAR_COLORS[standingID]			
 		bar.statusBar:SetStatusBarColor(color.r, color.g, color.b)	
 
-		bar.statusBar:SetMinMaxValues(min, max)
-		bar.statusBar:SetValue(value)
-		
-		for i=1, numFactions do
-			local factionName, _, standingID = GetFactionInfo(i);
-			if factionName == name then
-				ID = standingID
-			end
-		end
-		
-		
-		
+		bar.statusBar:SetMinMaxValues(barMin, barMax)
+		bar.statusBar:SetValue(barValue)
+
+		local text = ''
+		local textFormat = E.db.general.reputation.textFormat		
 		if textFormat == 'PERCENT' then
-			text = string.format('%s: %d%% [%s]', name, ((value - min) / (max - min) * 100), _G['FACTION_STANDING_LABEL'..ID])
+			text = string.format('%s: %d%% [%s]', name, ((barValue - barMin) / (barMax - barMin) * 100), _G['FACTION_STANDING_LABEL'..standingID])
 		elseif textFormat == 'CURMAX' then
-			text = string.format('%s: %s - %s [%s]', name, E:ShortValue(value - min), E:ShortValue(max - min), _G['FACTION_STANDING_LABEL'..ID])
+			text = string.format('%s: %s - %s [%s]', name, E:ShortValue(barValue - barMin), E:ShortValue(barMax - barMin), _G['FACTION_STANDING_LABEL'..standingID])
 		elseif textFormat == 'CURPERC' then
-			text = string.format('%s: %s - %d%% [%s]', name, E:ShortValue(value - min), ((value - min) / (max - min) * 100), _G['FACTION_STANDING_LABEL'..ID])
+			text = string.format('%s: %s - %d%% [%s]', name, E:ShortValue(barValue - barMin), ((barValue - barMin) / (barMax - barMin) * 100), _G['FACTION_STANDING_LABEL'..standingID])
 		end					
 		
-		bar.text:SetText(text)		
+		bar.text:SetText(text)
 	end
 	
 	self:UpdateExpRepAnchors()
@@ -123,16 +135,16 @@ local function ExperienceBar_OnEnter(self)
 	GameTooltip:ClearLines()
 	GameTooltip:SetOwner(self, 'ANCHOR_BOTTOM', 0, -4)
 	
-	local cur, max = M:GetXP('player')
+	local curValue, maxValue = M:GetXP('player')
 	local rested = GetXPExhaustion()
 	GameTooltip:AddLine(L['Experience'])
 	GameTooltip:AddLine(' ')
 	
-	GameTooltip:AddDoubleLine(L['XP:'], string.format(' %d / %d (%d%%)', cur, max, cur/max * 100), 1, 1, 1)
-	GameTooltip:AddDoubleLine(L['Remaining:'], string.format(' %d (%d%% - %d '..L['Bars']..')', max - cur, (max - cur) / max * 100, 20 * (max - cur) / max), 1, 1, 1)	
+	GameTooltip:AddDoubleLine(L['XP:'], string.format(' %d / %d (%d%%)', curValue, maxValue, curValue/maxValue * 100), 1, 1, 1)
+	GameTooltip:AddDoubleLine(L['Remaining:'], string.format(' %d (%d%% - %d '..L['Bars']..')', maxValue - curValue, (maxValue - curValue) / maxValue * 100, 20 * (maxValue - curValue) / maxValue), 1, 1, 1)	
 	
 	if rested then
-		GameTooltip:AddDoubleLine(L['Rested:'], string.format('+%d (%d%%)', rested, rested / max * 100), 1, 1, 1)	
+		GameTooltip:AddDoubleLine(L['Rested:'], string.format('+%d (%d%%)', rested, rested / maxValue * 100), 1, 1, 1)	
 	end
 	
 	GameTooltip:Show()
@@ -142,13 +154,13 @@ local function ReputationBar_OnEnter(self)
 	GameTooltip:ClearLines()
 	GameTooltip:SetOwner(self, 'ANCHOR_BOTTOM', 0, -4)
 	
-	local name, reaction, min, max, value = GetWatchedFactionInfo()
-	if name then
+	local isWatched, name, standingID, barMin, barMax, barValue = M:GetWatchedFactionInformation()
+	if isWatched then
 		GameTooltip:AddLine(name)
 		GameTooltip:AddLine(' ')
 		
-		GameTooltip:AddDoubleLine(STANDING..':', _G['FACTION_STANDING_LABEL'..reaction], 1, 1, 1)
-		GameTooltip:AddDoubleLine(REPUTATION..':', format('%d / %d (%d%%)', value - min, max - min, (value - min) / (max - min) * 100), 1, 1, 1)
+		GameTooltip:AddDoubleLine(STANDING..':', _G['FACTION_STANDING_LABEL'..standingID], 1, 1, 1)
+		GameTooltip:AddDoubleLine(REPUTATION..':', format('%d / %d (%d%%)', barValue - barMin, barMax - barMin, (barValue - barMin) / (barMax - barMin) * 100), 1, 1, 1)
 	end
 	GameTooltip:Show()
 end
@@ -177,6 +189,28 @@ function M:CreateBar(name, onEnter, ...)
 	E.FrameLocks[name] = true
 	
 	return bar
+end
+
+function M:SetWatchedFactionOnReputationBar(event, msg)
+	if not E.private.general.autorepchange then return end
+	
+	local _, _, faction, amount = find(msg, incpat)
+	if not faction then _, _, faction, amount = find(msg, changedpat) or find(msg, decpat) end
+	if faction then
+		if faction == GUILD_REPUTATION then
+			faction = GetGuildInfo("player")
+		end
+
+		local active = GetWatchedFactionInfo()
+		for factionIndex = 1, GetNumFactions() do
+			local name = GetFactionInfo(factionIndex)
+			if name == faction and name ~= active then
+				-- check if watch has been disabled by user
+				local inactive = IsFactionInactive(factionIndex) or SetWatchedFactionIndex(factionIndex)
+				break
+			end
+		end
+	end
 end
 
 function M:UpdateExpRepDimensions()
@@ -212,10 +246,15 @@ end
 
 function M:EnableDisable_ReputationBar()
 	if E.db.general.reputation.enable then
+		-- required for the GetNumFactions() function to return all factions in the game
+		ExpandAllFactionHeaders()
+
+		self:RegisterEvent("CHAT_MSG_COMBAT_FACTION_CHANGE", 'SetWatchedFactionOnReputationBar')
 		self:RegisterEvent('UPDATE_FACTION', 'UpdateReputation')
 		self:UpdateReputation()
 	else
 		self:UnregisterEvent('UPDATE_FACTION')
+		self:UnregisterEvent("CHAT_MSG_COMBAT_FACTION_CHANGE")
 		self.repBar:Hide()
 	end
 end

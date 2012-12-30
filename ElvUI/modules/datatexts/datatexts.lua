@@ -154,7 +154,13 @@ end
 function DT:AssignPanelToDataText(panel, data)	
 	if data['events'] then
 		for _, event in pairs(data['events']) do
-			panel:RegisterEvent(event)
+			-- use new filtered event registration for appropriate events
+			if event == "UNIT_AURA" or event == "UNIT_RESISTANCES"  or event == "UNIT_STATS" or event == "UNIT_ATTACK_POWER" 
+				or event == "UNIT_RANGED_ATTACK_POWER" or event == "UNIT_TARGET" or event == "UNIT_SPELL_HASTE" then
+				panel:RegisterUnitEvent(event, 'player')
+			else
+				panel:RegisterEvent(event)
+			end
 		end
 	end
 	
@@ -190,6 +196,7 @@ function DT:LoadDataTexts()
 	end	
 
 	local inInstance, instanceType = IsInInstance()
+	local fontTemplate = LSM:Fetch("font", self.db.font)
 	for panelName, panel in pairs(DT.RegisteredPanels) do
 		--Restore Panels
 		for i=1, panel.numPoints do
@@ -199,7 +206,7 @@ function DT:LoadDataTexts()
 			panel.dataPanels[pointIndex]:SetScript('OnEnter', nil)
 			panel.dataPanels[pointIndex]:SetScript('OnLeave', nil)
 			panel.dataPanels[pointIndex]:SetScript('OnClick', nil)
-			panel.dataPanels[pointIndex].text:FontTemplate(LSM:Fetch("font", self.db.font), self.db.fontSize, self.db.fontOutline)
+			panel.dataPanels[pointIndex].text:FontTemplate(fontTemplate, self.db.fontSize, self.db.fontOutline)
 			panel.dataPanels[pointIndex].text:SetText(nil)
 			panel.dataPanels[pointIndex].pointIndex = pointIndex
 			

@@ -471,6 +471,10 @@ L["Send ADDON_ACTION_BLOCKED errors to the Lua Error frame. These errors are les
 L["Skin the blizzard chat bubbles."] = true;
 L["The font that appears on the text above players heads. |cffFF0000WARNING: This requires a game restart or re-log for this change to take effect.|r"] = true;
 L["Tiny Map"] = true;
+L['PvP Autorelease'] = true;
+L['Automatically release body when killed inside a battleground.'] = true;
+L['Track Reputation'] = true;
+L['Automatically change your watched faction on the reputation bar to the faction you got reputation points for.'] = true;
 L['Toggle Tutorials'] = true;
 L['Top Panel'] = true;
 L["Welcome to ElvUI version %s!"] = true;
