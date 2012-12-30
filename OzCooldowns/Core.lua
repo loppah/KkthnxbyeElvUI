@@ -665,7 +665,7 @@ OnUpdate = function (self, elapsed)
 			if (self.StatusBar) then
 				self.StatusBar:SetValue(normalized)
 				self.DurationText:SetText(math.floor(currentDuration))
-				self.StatusBar:GetStatusBarTexture():SetVertexColor(normalized, 1-normalized, 0/255);
+				self.StatusBar:GetStatusBarTexture():SetVertexColor(1-normalized, normalized, 0/255);
 			end
 			if (self.Cooldown) then
 				self.Cooldown:SetCooldown(start, duration)
