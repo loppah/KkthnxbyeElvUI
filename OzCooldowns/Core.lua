@@ -1,3 +1,4 @@
+if not (IsAddOnLoaded("Tukui") or IsAddOnLoaded("AsphyxiaUI") or IsAddOnLoaded("DuffedUI") or IsAddOnLoaded("ElvUI")) then return end
 local spellCooldowns = {
 	["PRIEST"] = {
 		47585, -- Dispersion
@@ -576,7 +577,7 @@ local function createCooldownFrame(spell)
 	if (OzCooldownsDisplay == "STATUSBAR") then
 		-- Text Timer
 		local durationText = frame:CreateFontString(nil, "OVERLAY")
-		durationText:SetFont([[Interface\AddOns\OzCooldowns\normal.ttf]], 11, "OUTLINE")
+		durationText:SetFont([[Interface\AddOns\OzCooldowns\normal.ttf]], 10, "OUTLINE")
 		durationText:SetTextColor(1,1,0,1)
 		durationText:SetText("")
 		durationText:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 2, 2)
@@ -614,7 +615,10 @@ local function createCooldownFrame(spell)
 end
 
 local function HandleEvent(self, event, arg1)
-	if event == "PLAYER_ENTERING_WORLD" or event == "PLAYER_TALENT_UPDATE" then
+	if event == "PLAYER_ENTERING_WORLD" then
+		print("|cFF00FFFFOz|rCooldowns |cffC495DDTukui|r / |cff1784d1ElvUI|r Edition by |cFFFF7D0AAzilroka|r - Version: |cff1784d1"..GetAddOnMetadata("OzCooldowns", "Version").."|r Loaded!")
+	end
+	if event == "PLAYER_LOGIN" or event == "PLAYER_TALENT_UPDATE" then
 	OzCooldownsSpacing = 10
 	OzCooldownsSize = 36
 	if OzCooldownsDirection == nil then OzCooldownsDirection = "HORIZONTAL" end
@@ -661,7 +665,7 @@ OnUpdate = function (self, elapsed)
 			if (self.StatusBar) then
 				self.StatusBar:SetValue(normalized)
 				self.DurationText:SetText(math.floor(currentDuration))
-				self.StatusBar:GetStatusBarTexture():SetVertexColor(1-normalized, normalized, 0/255);
+				self.StatusBar:GetStatusBarTexture():SetVertexColor(normalized, 1-normalized, 0/255);
 			end
 			if (self.Cooldown) then
 				self.Cooldown:SetCooldown(start, duration)
@@ -690,7 +694,7 @@ OzCooldownsMover:RegisterForDrag("LeftButton")
 OzCooldownsMover:SetScript("OnDragStart", function(self) self:StartMoving() end)
 OzCooldownsMover:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
 OzCooldownsMoverText = OzCooldownsMover:CreateFontString(nil, "OVERLAY")
-OzCooldownsMoverText:SetFont([[Interface\AddOns\OzCooldowns\normal.ttf]], 11, "OUTLINE")
+OzCooldownsMoverText:SetFont([[Interface\AddOns\OzCooldowns\normal.ttf]], 10, "OUTLINE")
 OzCooldownsMoverText:SetText("OzCooldowns Mover")
 OzCooldownsMoverText:SetPoint("CENTER")
 
@@ -699,10 +703,10 @@ OzCooldownFrame:SetFrameStrata("BACKGROUND")
 OzCooldownFrame:SetHeight(40)
 OzCooldownFrame:SetWidth(40)
 OzCooldownFrame:SetPoint("TOP", OzCooldownsMover, "TOP", 0, -2)
+OzCooldownFrame:RegisterEvent("PLAYER_LOGIN")
 OzCooldownFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
 OzCooldownFrame:RegisterEvent("SPELL_UPDATE_COOLDOWN")
 OzCooldownFrame:RegisterEvent("PLAYER_TALENT_UPDATE")
-OzCooldownFrame:RegisterEvent("UNIT_AURA")
 OzCooldownFrame:SetScript("OnEvent", HandleEvent)
 
 SLASH_OZCDMOVER1, SLASH_OZCDMOVER2 = '/mozcd', '/moveozcd'
