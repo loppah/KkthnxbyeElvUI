@@ -2,9 +2,9 @@
 ## DefaultState: Enabled
 ## Title: |cFF00FFFFOz|rCooldowns |cffC495DDTukui|r / |cff1784d1ElvUI|r Edition
 ## Author: Nimaear, Azilroka
-## Version: 1.06
+## Version: 1.07
 ## OptionalDeps: Tukui, ElvUI
-## SavedVariables: OzCooldownsDirection, OzCooldownsMode, OzCooldownsDisplay
+## SavedVariables: OzCooldownsOptions
 ## Notes: Cooldowns
 
 Core.lua

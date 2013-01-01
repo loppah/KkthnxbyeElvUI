@@ -1,4 +1,5 @@
 if not (IsAddOnLoaded("Tukui") or IsAddOnLoaded("AsphyxiaUI") or IsAddOnLoaded("DuffedUI") or IsAddOnLoaded("ElvUI")) then return end
+OzCooldownsOptions = {}
 local spellCooldowns = {
 	["PRIEST"] = {
 		47585, -- Dispersion
@@ -403,7 +404,7 @@ local function enableCooldown (self)
 	end
 	self:SetScript("OnUpdate", OnUpdate)
 	OnUpdate(self,1)
-	if (OzCooldownsMode == "HIDE") then
+	if (OzCooldownsOptions.Mode == "HIDE") then
 		self:Show()
 	else
 		self.Icon:SetVertexColor(1,1,1,1)
@@ -413,7 +414,7 @@ end
 
 local function disableCooldown(self)
 	self.enabled = false
-	if (OzCooldownsMode == "HIDE") then
+	if (OzCooldownsOptions.Mode == "HIDE") then
 		self:Hide()
 	else
 		self.Icon:SetVertexColor(1,1,1,0.15)
@@ -430,12 +431,12 @@ local function disableCooldown(self)
 end
 
 local function positionHide()
-	local xSpacing, ySpacing = OzCooldownsSpacing, 0
+	local xSpacing, ySpacing = OzCooldownsOptions.Spacing, 0
 	local anchorPoint = "TOPRIGHT"
-	if (OzCooldownsDirection == "VERTICAL") then
+	if (OzCooldownsOptions.Direction == "VERTICAL") then
 		xSpacing = 0
-		ySpacing = -OzCooldownsSpacing
-		if OzCooldownsDisplay == "STATUSBAR" then ySpacing = -(OzCooldownsSpacing+8) end
+		ySpacing = -OzCooldownsOptions.Spacing
+		if OzCooldownsOptions.Display == "STATUSBAR" then ySpacing = -(OzCooldownsOptions.Spacing+8) end
 		anchorPoint = "BOTTOMLEFT"
 	end
 	local lastFrame = OzCooldownFrame
@@ -475,20 +476,20 @@ local function positionHide()
 			end
 		end
 	end
-	if (OzCooldownsDirection == "HORIZONTAL") then
-		OzCooldownFrame:SetWidth(OzCooldownsSize*index+(index+1)*xSpacing)
+	if (OzCooldownsOptions.Direction == "HORIZONTAL") then
+		OzCooldownFrame:SetWidth(OzCooldownsOptions.Size*index+(index+1)*xSpacing)
 	else
-		OzCooldownFrame:SetHeight(OzCooldownsSize*index+(index+1)*ySpacing)
+		OzCooldownFrame:SetHeight(OzCooldownsOptions.Size*index+(index+1)*ySpacing)
 	end
 end
 
 local function positionDim()
-	local xSpacing, ySpacing = OzCooldownsSpacing, 0
+	local xSpacing, ySpacing = OzCooldownsOptions.Spacing, 0
 	local anchorPoint = "TOPRIGHT"
-	if (OzCooldownsDirection == "VERTICAL") then
+	if (OzCooldownsOptions.Direction == "VERTICAL") then
 		xSpacing = 0
-		ySpacing = -OzCooldownsSpacing
-		if OzCooldownsDisplay == "STATUSBAR" then ySpacing = -(OzCooldownsSpacing+8) end
+		ySpacing = -OzCooldownsOptions.Spacing
+		if OzCooldownsOptions.Display == "STATUSBAR" then ySpacing = -(OzCooldownsOptions.Spacing+8) end
 		anchorPoint = "BOTTOMLEFT"
 	end
 	local lastFrame = OzCooldownFrame
@@ -528,16 +529,16 @@ local function positionDim()
 			end
 		end
 	end
-	if (OzCooldownsDirection == "HORIZONTAL") then
-		OzCooldownFrame:SetWidth(OzCooldownsSize*index+(index+1)*xSpacing)
+	if (OzCooldownsOptions.Direction == "HORIZONTAL") then
+		OzCooldownFrame:SetWidth(OzCooldownsOptions.Size*index+(index+1)*xSpacing)
 	else
-		OzCooldownFrame:SetHeight(OzCooldownsSize*index+(index+1)*ySpacing)
+		OzCooldownFrame:SetHeight(OzCooldownsOptions.Size*index+(index+1)*ySpacing)
 	end
 end
 
 
 local function position()
-	if (OzCooldownsMode == "HIDE") then
+	if (OzCooldownsOptions.Mode == "HIDE") then
 		positionHide()
 	else
 		positionDim()
@@ -554,8 +555,8 @@ local function createCooldownFrame(spell)
 	else
 		frame:CreateBackdrop("Transparent")
 	end
-	frame:SetHeight(OzCooldownsSize)
-	frame:SetWidth(OzCooldownsSize)
+	frame:SetHeight(OzCooldownsOptions.Size)
+	frame:SetWidth(OzCooldownsOptions.Size)
 	frame:SetFrameStrata("MEDIUM")
 
 	-- Cooldown Texture
@@ -573,11 +574,10 @@ local function createCooldownFrame(spell)
 	icon:SetTexture(texture)
 	icon:SetTexCoord(0.08,0.92,0.08,0.92)
 	frame.Icon = icon
-
-	if (OzCooldownsDisplay == "STATUSBAR") then
+	if (OzCooldownsOptions.Display == "STATUSBAR") then
 		-- Text Timer
 		local durationText = frame:CreateFontString(nil, "OVERLAY")
-		durationText:SetFont([[Interface\AddOns\OzCooldowns\normal.ttf]], 10, "OUTLINE")
+		durationText:SetFont([[Interface\AddOns\OzCooldowns\normal.ttf]], 11, "OUTLINE")
 		durationText:SetTextColor(1,1,0,1)
 		durationText:SetText("")
 		durationText:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 2, 2)
@@ -599,7 +599,7 @@ local function createCooldownFrame(spell)
 		statusBar:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 0, ElvUI and E.PixelMode and -7 or -10)
 		statusBar:SetMinMaxValues(0, 1)
 		frame.StatusBar = statusBar
-	elseif (OzCooldownsDisplay == "SPIRAL") then
+	elseif (OzCooldownsOptions.Display == "SPIRAL") then
 		local cooldown = CreateFrame("Cooldown",nil,frame)
 		cooldown:SetAllPoints(icon)
 		frame.Cooldown = cooldown
@@ -616,14 +616,15 @@ end
 
 local function HandleEvent(self, event, arg1)
 	if event == "PLAYER_ENTERING_WORLD" then
-		print("|cFF00FFFFOz|rCooldowns |cffC495DDTukui|r / |cff1784d1ElvUI|r Edition by |cFFFF7D0AAzilroka|r - Version: |cff1784d1"..GetAddOnMetadata("OzCooldowns", "Version").."|r Loaded!")
+		print("|cFF00FFFFOz|rCooldowns |cffC495DDTukui|r/|cff1784d1ElvUI|r Edition by |cFFFF7D0AAzilroka|r - Version: |cff1784d1"..GetAddOnMetadata("OzCooldowns", "Version").."|r Loaded!")
 	end
-	if event == "PLAYER_LOGIN" or event == "PLAYER_TALENT_UPDATE" then
-	OzCooldownsSpacing = 10
-	OzCooldownsSize = 36
-	if OzCooldownsDirection == nil then OzCooldownsDirection = "HORIZONTAL" end
-	if OzCooldownsDisplay == nil then OzCooldownsDisplay = "STATUSBAR" end
-	if OzCooldownsMode == nil then OzCooldownsMode = "HIDE" end
+	if event == "ADDON_LOADED" or event == "PLAYER_TALENT_UPDATE" then
+	if OzCooldownsOptions.Spacing == nil then OzCooldownsOptions.Spacing = 10 end
+	if OzCooldownsOptions.Size == nil then OzCooldownsOptions.Size = 36 end
+	if OzCooldownsOptions.Direction == nil then OzCooldownsOptions.Direction = "HORIZONTAL" end
+	if OzCooldownsOptions.Display == nil then OzCooldownsOptions.Display = "STATUSBAR" end
+	if OzCooldownsOptions.Mode == nil then OzCooldownsOptions.Mode = "HIDE" end
+	if OzCooldownsOptions.Fade == nil then OzCooldownsOptions.Fade = 0 end
 
 		for k, v in pairs(spells) do
 			if GetSpellInfo(v) then
@@ -665,7 +666,13 @@ OnUpdate = function (self, elapsed)
 			if (self.StatusBar) then
 				self.StatusBar:SetValue(normalized)
 				self.DurationText:SetText(math.floor(currentDuration))
-				self.StatusBar:GetStatusBarTexture():SetVertexColor(1-normalized, normalized, 0/255);
+				if OzCooldownsOptions.Fade == 0 then
+					self.StatusBar:GetStatusBarTexture():SetVertexColor(0.24,0.54,0.78);
+				elseif OzCooldownsOptions.Fade == 1 then
+					self.StatusBar:GetStatusBarTexture():SetVertexColor(1-normalized, normalized, 0/255)
+				elseif OzCooldownsOptions.Fade == 2 then	
+					self.StatusBar:GetStatusBarTexture():SetVertexColor(normalized, 1-normalized, 0/255)
+				end
 			end
 			if (self.Cooldown) then
 				self.Cooldown:SetCooldown(start, duration)
@@ -694,7 +701,7 @@ OzCooldownsMover:RegisterForDrag("LeftButton")
 OzCooldownsMover:SetScript("OnDragStart", function(self) self:StartMoving() end)
 OzCooldownsMover:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
 OzCooldownsMoverText = OzCooldownsMover:CreateFontString(nil, "OVERLAY")
-OzCooldownsMoverText:SetFont([[Interface\AddOns\OzCooldowns\normal.ttf]], 10, "OUTLINE")
+OzCooldownsMoverText:SetFont([[Interface\AddOns\OzCooldowns\normal.ttf]], 11, "OUTLINE")
 OzCooldownsMoverText:SetText("OzCooldowns Mover")
 OzCooldownsMoverText:SetPoint("CENTER")
 
@@ -703,60 +710,29 @@ OzCooldownFrame:SetFrameStrata("BACKGROUND")
 OzCooldownFrame:SetHeight(40)
 OzCooldownFrame:SetWidth(40)
 OzCooldownFrame:SetPoint("TOP", OzCooldownsMover, "TOP", 0, -2)
-OzCooldownFrame:RegisterEvent("PLAYER_LOGIN")
 OzCooldownFrame:RegisterEvent("PLAYER_ENTERING_WORLD")
+OzCooldownFrame:RegisterEvent("ADDON_LOADED")
 OzCooldownFrame:RegisterEvent("SPELL_UPDATE_COOLDOWN")
 OzCooldownFrame:RegisterEvent("PLAYER_TALENT_UPDATE")
 OzCooldownFrame:SetScript("OnEvent", HandleEvent)
 
-SLASH_OZCDMOVER1, SLASH_OZCDMOVER2 = '/mozcd', '/moveozcd'
-function SlashCmdList.OZCDMOVER(msg, editbox)
-	if OzCooldownsMover:IsShown() then
-		OzCooldownsMover:Hide()
-	else
-		OzCooldownsMover:Show()
+SLASH_OZCOOLDOWNS1 = "/ozcd"
+SlashCmdList["OZCOOLDOWNS"] = function(arg)
+	if arg == "unlock" then
+		if OzCooldownsMover:IsShown() then
+			OzCooldownsMover:Hide()
+		else
+			OzCooldownsMover:Show()
+		end
+	elseif arg == "options" then
+		if OzCooldownsOptionsFrame:IsShown() then
+			OzCooldownsOptionsFrame:Hide()
+		else
+			OzCooldownsOptionsFrame:Show()
+		end
+	elseif arg == "" then
+		print("|cFF00FFFFOz|rCooldowns Options.")
+		print("/ozcd unlock - Allow you to move |cFF00FFFFOz|rCooldowns.")
+		print("/ozcd options - Shows the |cFF00FFFFOz|rCooldowns Options.")
 	end
 end
-SLASH_OZCOOLDOWNS1 = "/ozcd"
-	SlashCmdList["OZCOOLDOWNS"] = function(arg)
-		if arg == "direction" then
-			if OzCooldownsDirection == "VERTICAL" then
-				OzCooldownsDirection = "HORIZONTAL"
-				print("|cFF00FFFFOz|rCooldowns: Switching to Horizontal Layout.")
-			else
-				OzCooldownsDirection = "VERTICAL"
-				print("|cFF00FFFFOz|rCooldowns: Switching to Vertical Layout.")
-			end
-		print("|cFF00FFFFOz|rCooldowns: Please Reload for changes to take effect.. /rl")
-		elseif arg == "display" then
-			if OzCooldownsDisplay == "STATUSBAR" then
-				OzCooldownsDisplay = "SPIRAL"
-				print("|cFF00FFFFOz|rCooldowns: Switching to Spiral Cooldown Layout.")
-			else
-				OzCooldownsDisplay = "STATUSBAR"
-				print("|cFF00FFFFOz|rCooldowns: Switching to Statusbar Cooldown Layout.")
-			end
-		print("|cFF00FFFFOz|rCooldowns: Please Reload for changes to take effect.. /rl")
-		elseif arg == "mode" then
-			if OzCooldownsMode == "HIDE" then
-				OzCooldownsMode = "DIM"
-				print("|cFF00FFFFOz|rCooldowns: Switching to DIM Mode.")
-				print("|cFF00FFFFOz|rCooldowns: DIM mode is not available to Death Knight, Rogue, Warrior or Hunter.")
-			else
-				OzCooldownsMode = "HIDE"
-			end
-		print("|cFF00FFFFOz|rCooldowns: Please Reload for changes to take effect. /rl")
-		elseif arg == "move" then
-			if OzCooldownsMover:IsShown() then
-				OzCooldownsMover:Hide()
-			else
-				OzCooldownsMover:Show()
-			end
-		elseif arg == "" then
-			print("|cFF00FFFFOz|rCooldowns Options.")
-			print("/|cFF00FFFFoz|rcd direction - Horizontal or Vertical : Current Active Direction: "..OzCooldownsDirection)
-			print("/|cFF00FFFFoz|rcd display - Statusbar or Spiral: Current Active Display: "..OzCooldownsDisplay)
-			print("/|cFF00FFFFoz|rcd mode - Dim or Hide : Current Active Mode: "..OzCooldownsMode)
-			print("/|cFF00FFFFoz|rcd move - Shows the mover.")
-		end
-	end
