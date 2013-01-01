@@ -9,13 +9,9 @@ I do not claim that I made these Addons and or claim any of the code but the cod
 All credits below to the respected people who made/edited/improved each addon.
 
 
-ElvUI - Author: Omega1970, Elv
+ElvUI - Author: Omega1970 for ops, Elv
 
 ElvUI_Addons Skins - Author: Sortokk, Azilroka, others in Credits.txt
-
-ElvUI_ Chat Tweaks - Author: Lockslap
-
-ElvUI_Loclite - Author: Benik
 
 ElvUI_VisualAuraTimers - Author: Blazeflack
 
