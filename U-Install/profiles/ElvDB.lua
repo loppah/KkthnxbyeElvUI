@@ -516,7 +516,6 @@ local profile = {
 				["bagSize"] = 28,
 				["sortInverted"] = false,
 				},
-			},
 }
 
 E:RegisterProfile(name, profile, ace3)
