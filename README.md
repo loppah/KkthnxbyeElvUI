@@ -24,7 +24,7 @@ http://www.tukui.org/forums/register.php
 BECOME A PREMIUM MEMBER
 http://www.tukui.org/premium.php
 
-Please do remmeber the people who take time to make these addons/UIs work hard, sometimes day and night working to fix and or add things for you! So please thank them and the others who give a hand like Omega1970
+Please do rememeber the people who take time to make these addons/UIs work hard, sometimes day and night working to fix and or add things for you! So please thank them and the others who give a hand like Omega1970
 
 Omega1970
 https://github.com/omega1970/AddOns/tree/master/ElvUI
