@@ -109,7 +109,7 @@ function UF:PostUpdatePower(unit, min, max)
 		local color = ElvUF['colors'].power[tokens[pType]]
 		
 		if not self.colorClass then
-			local color = ElvUF['colors'].power[powerTypes[pType]]
+			local color = ElvUF['colors'].power[tokens[pType]]
 			self:SetStatusBarColor(color[1], color[2], color[3])
 			local mu = self.bg.multiplier or 1
 			self.bg:SetVertexColor(color[1] * mu, color[2] * mu, color[3] * mu)
@@ -226,7 +226,7 @@ function UF:PostUpdateAura(unit, button, index, offset, filter, isDebuff, durati
 	
 	button.spell = name
 	button.isStealable = isStealable
-	if duration ~= 0 then
+	if expiration and duration ~= 0 then
 		if not button:GetScript('OnUpdate') then
 			button.expirationTime = expiration
 			button.expiration = expiration - GetTime()
@@ -238,8 +238,7 @@ function UF:PostUpdateAura(unit, button, index, offset, filter, isDebuff, durati
 			button.expiration = expiration - GetTime()
 			button.nextupdate = 0.05
 		end
-	end	
-	if duration == 0 or expiration == 0 then
+	else
 		button:SetScript('OnUpdate', nil)
 		button.text:SetText('')
 	end
@@ -251,19 +250,19 @@ function UF:CustomCastDelayText(duration)
 	
 	if self.channeling then
 		if db.castbar.format == 'CURRENT' then
-			self.Time:SetText(("%.1f |cffaf5050%.1f|r"):format(abs(duration - self.max), self.delay))
+			self.Time:SetFormattedText("%.1f |cffaf5050%.1f|r", abs(duration - self.max), self.delay)
 		elseif db.castbar.format == 'CURRENTMAX' then
-			self.Time:SetText(("%.1f / %.1f |cffaf5050%.1f|r"):format(duration, self.max, self.delay))
+			self.Time:SetFormattedText("%.1f / %.1f |cffaf5050%.1f|r", duration, self.max, self.delay)
 		elseif db.castbar.format == 'REMAINING' then
-			self.Time:SetText(("%.1f |cffaf5050%.1f|r"):format(duration, self.delay))
+			self.Time:SetFormattedText("%.1f |cffaf5050%.1f|r", duration, self.delay)
 		end			
 	else
 		if db.castbar.format == 'CURRENT' then
-			self.Time:SetText(("%.1f |cffaf5050%s %.1f|r"):format(duration, "+", self.delay))
+			self.Time:SetFormattedText("%.1f |cffaf5050%s %.1f|r", duration, "+", self.delay)
 		elseif db.castbar.format == 'CURRENTMAX' then
-			self.Time:SetText(("%.1f / %.1f |cffaf5050%s %.1f|r"):format(duration, self.max, "+", self.delay))
+			self.Time:SetFormattedText("%.1f / %.1f |cffaf5050%s %.1f|r", duration, self.max, "+", self.delay)
 		elseif db.castbar.format == 'REMAINING' then
-			self.Time:SetText(("%.1f |cffaf5050%s %.1f|r"):format(abs(duration - self.max), "+", self.delay))
+			self.Time:SetFormattedText("%.1f |cffaf5050%s %.1f|r", abs(duration - self.max), "+", self.delay)
 		end		
 	end
 end
@@ -274,20 +273,19 @@ function UF:CustomTimeText(duration)
 
 	if self.channeling then
 		if db.castbar.format == 'CURRENT' then
-			self.Time:SetText(("%.1f"):format(abs(duration - self.max)))
+			self.Time:SetFormattedText("%.1f", abs(duration - self.max))
 		elseif db.castbar.format == 'CURRENTMAX' then
-			self.Time:SetText(("%.1f / %.1f"):format(duration, self.max))
-			self.Time:SetText(("%.1f / %.1f"):format(abs(duration - self.max), self.max))
+			self.Time:SetFormattedText("%.1f / %.1f", abs(duration - self.max), self.max)
 		elseif db.castbar.format == 'REMAINING' then
-			self.Time:SetText(("%.1f"):format(duration))
+			self.Time:SetFormattedText("%.1f", duration)
 		end				
 	else
 		if db.castbar.format == 'CURRENT' then
-			self.Time:SetText(("%.1f"):format(duration))
+			self.Time:SetFormattedText("%.1f", duration)
 		elseif db.castbar.format == 'CURRENTMAX' then
-			self.Time:SetText(("%.1f / %.1f"):format(duration, self.max))
+			self.Time:SetFormattedText("%.1f / %.1f", duration, self.max)
 		elseif db.castbar.format == 'REMAINING' then
-			self.Time:SetText(("%.1f"):format(abs(duration - self.max)))
+			self.Time:SetFormattedText("%.1f", abs(duration - self.max))
 		end		
 	end
 end
