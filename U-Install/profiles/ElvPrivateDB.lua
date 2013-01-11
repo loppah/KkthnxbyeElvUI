@@ -4,6 +4,7 @@ local name, ace3 = "ElvPrivateDB", true
 local profile = {
    		["general"] = {
 			["normTex"] = "Flatt",
+			["autorepchange"] = false,
 			["glossTex"] = "Flatt",
 		},
 		['auras'] = {
