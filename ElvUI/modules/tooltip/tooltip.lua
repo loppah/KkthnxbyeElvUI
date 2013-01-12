@@ -7,10 +7,10 @@ local gsub, find, format = string.gsub, string.find, string.format
 local abs, floor = math.abs, math.floor
 
 TT.InspectCache = {};
-TT.lastInspectRequest = 0
+TT.lastInspectRequest = 0;
 
-local INSPECT_DELAY = 0.2
-local INSPECT_FREQ = 2
+local INSPECT_DELAY = 0.2;
+local INSPECT_FREQ = 2;
 
 local GameTooltips = {
 	GameTooltip,
@@ -60,9 +60,13 @@ function TT:SetStatusBarAnchor(pos)
 	end
 	
 	if not GameTooltipStatusBar.text then return end
+	GameTooltipStatusBar.text:ClearAllPoints()
 	
-	GameTooltipStatusBar.text:ClearAllPoints()	
-	GameTooltipStatusBar.text:Point("CENTER", GameTooltipStatusBar, 0, pos == 'BOTTOM' and -3 or 3)
+	if pos == 'BOTTOM' then
+		GameTooltipStatusBar.text:Point("CENTER", GameTooltipStatusBar, 0, -3)
+	else
+		GameTooltipStatusBar.text:Point("CENTER", GameTooltipStatusBar, 0, 3)	
+	end
 end
 
 function TT:GameTooltip_SetDefaultAnchor(tt, parent)
@@ -313,7 +317,7 @@ end
 
 -- Add "Targeted By" line
 local targetedList = {}
-local ClassColors = {}
+local ClassColors = {};
 local token
 
 for class, color in next, RAID_CLASS_COLORS do
@@ -324,8 +328,8 @@ function TT:AddTargetedBy()
 	local numGroup = GetNumGroupMembers()
 	if IsInGroup() then
 		for i = 1, numGroup do
-			local unit = (IsInRaid() and ("raid%d"):format(i) or ("party%d"):format(i))
-			if (UnitIsUnit(("%starget"):format(unit),token)) and (not UnitIsUnit(unit, "player")) then
+			local unit = (IsInRaid() and "raid"..i or "party"..i);
+			if (UnitIsUnit(unit.."target",token)) and (not UnitIsUnit(unit,"player")) then
 				local _, class = UnitClass(unit);
 				targetedList[#targetedList + 1] = ClassColors[class];
 				targetedList[#targetedList + 1] = UnitName(unit);
@@ -541,13 +545,14 @@ function TT:GameTooltip_OnTooltipSetUnit(tt)
 	end
 	
 	if iLevel > 1 and IsShiftKeyDown() then
-		GameTooltip:AddDoubleLine(("%s:"):format(STAT_AVERAGE_ITEM_LEVEL), ("|cffFFFFFF%d|r"):format(iLevel))
+		GameTooltip:AddDoubleLine(STAT_AVERAGE_ITEM_LEVEL..":", ("|cffFFFFFF%d|r"):format(iLevel))
 	end	
 
 	-- ToT line
 	local totKey = ("%starget"):format(unit)
 	if unit~="player" and UnitExists(totKey) then
-		GameTooltip:AddDoubleLine(("%s:"):format(TARGET), ("%s%s|r"):format(TT:GetColor(totKey) or "|cffFFFFFF", UnitName(totKey)))
+		local hex = TT:GetColor(totKey) or "|cffFFFFFF"
+		GameTooltip:AddDoubleLine(TARGET..":", ("%s%s|r"):format(hex, UnitName(totKey)))
 	end
 	
 	if E.db.tooltip.whostarget then token = unit TT:AddTargetedBy() end
@@ -572,12 +577,14 @@ function TT:GameTooltipStatusBar_OnValueChanged(tt, value)
 
 	if tt.text then
 		if unit and self.db.health then
+			min, max = UnitHealth(unit), UnitHealthMax(unit)
+			tt.text:Show()
+			local hp = E:ShortValue(min).." / "..E:ShortValue(max)
 			if UnitIsDeadOrGhost(unit) then
 				tt.text:SetText(DEAD)
 			else
-				tt.text:SetText("%s / %s", E:ShortValue(UnitHealth(unit)), E:ShortValue(UnitHealthMax(unit)))
+				tt.text:SetText(hp)
 			end
-			tt.text:Show()
 		else
 			tt.text:Hide()
 		end

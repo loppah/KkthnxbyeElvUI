@@ -1,12 +1,15 @@
 local E, L, V, P, G, _ = unpack(select(2, ...)); --Inport: Engine, Locales, PrivateDB, ProfileDB, GlobalDB, Localize Underscore
 local UF = E:GetModule('UnitFrames');
 local LSM = LibStub("LibSharedMedia-3.0");
+local LSR = LibStub("LibSpecRoster-1.0")
 
 local sub = string.sub
 local abs, random, floor, ceil = math.abs, math.random, math.floor, math.ceil
 local _, ns = ...
 local ElvUF = ns.oUF
 assert(ElvUF, "ElvUI was unable to locate oUF.")
+
+local unitframeFont
 
 local function CheckFilter(filterType, isFriend)
 	local FRIENDLY_CHECK, ENEMY_CHECK = false, false
@@ -92,7 +95,8 @@ function UF:PostNamePosition(frame, unit)
 	end
 end
 
-local tokens = { [0] = "MANA", "RAGE", "FOCUS", "ENERGY", "RUNIC_POWER" }
+local tokens = { [0] = "MANA", "RAGE", "FOCUS", "ENERGY", [6] = "RUNIC_POWER" }
+
 function UF:PostUpdatePower(unit, min, max)
 	local pType, _, altR, altG, altB = UnitPowerType(unit)
 	local parent = self:GetParent()
@@ -100,10 +104,11 @@ function UF:PostUpdatePower(unit, min, max)
 	if parent.isForced then
 		min = random(1, max)
 		pType = random(0, 4)
+		pType = pType == 4 and 6 or pType
 		self:SetValue(min)
-		local color = ElvUF['colors'].power[tokens[pType]]
 		
 		if not self.colorClass then
+			local color = ElvUF['colors'].power[tokens[pType]]
 			self:SetStatusBarColor(color[1], color[2], color[3])
 			local mu = self.bg.multiplier or 1
 			self.bg:SetVertexColor(color[1] * mu, color[2] * mu, color[3] * mu)
@@ -113,8 +118,8 @@ function UF:PostUpdatePower(unit, min, max)
 	local db = parent.db
 	if self.LowManaText and db then
 		if pType == 0 and not UnitIsDeadOrGhost(unit)
-		and (max == 0 and 0 or floor(min / max * 100)) <= db.lowmana then
-			self.LowManaText:SetText(LOW..' '..MANA)
+			and (max == 0 and 0 or floor(min / max * 100)) <= db.lowmana then
+			self.LowManaText:SetFormattedText("%s %s", LOW, MANA)
 			E:Flash(self.LowManaText, 0.6)
 		else
 			self.LowManaText:SetText()
@@ -174,7 +179,7 @@ function UF:PostUpdateAura(unit, button, index, offset, filter, isDebuff, durati
 	local db = self:GetParent().db
 	
 	if db and db[self.type] then
-		local unitframeFont = LSM:Fetch("font", E.db['unitframe'].font)
+		unitframeFont = unitframeFont or LSM:Fetch("font", E.db['unitframe'].font)
 	
 		button.text:FontTemplate(unitframeFont, db[self.type].fontSize, 'OUTLINE')
 		button.count:FontTemplate(unitframeFont, db[self.type].fontSize, 'OUTLINE')
@@ -227,8 +232,7 @@ function UF:PostUpdateAura(unit, button, index, offset, filter, isDebuff, durati
 			button.expiration = expiration - GetTime()
 			button.nextupdate = 0.05
 		end
-	end	
-	if duration == 0 or expiration == 0 then
+	else
 		button:SetScript('OnUpdate', nil)
 		if button.text:GetFont() then
 			button.text:SetText('')
@@ -242,19 +246,19 @@ function UF:CustomCastDelayText(duration)
 	
 	if self.channeling then
 		if db.castbar.format == 'CURRENT' then
-			self.Time:SetText(("%.1f |cffaf5050%.1f|r"):format(abs(duration - self.max), self.delay))
+			self.Time:SetFormattedText("%.1f |cffaf5050%.1f|r", abs(duration - self.max), self.delay)
 		elseif db.castbar.format == 'CURRENTMAX' then
-			self.Time:SetText(("%.1f / %.1f |cffaf5050%.1f|r"):format(duration, self.max, self.delay))
+			self.Time:SetFormattedText("%.1f / %.1f |cffaf5050%.1f|r", duration, self.max, self.delay)
 		elseif db.castbar.format == 'REMAINING' then
-			self.Time:SetText(("%.1f |cffaf5050%.1f|r"):format(duration, self.delay))
+			self.Time:SetFormattedText("%.1f |cffaf5050%.1f|r", duration, self.delay)
 		end			
 	else
 		if db.castbar.format == 'CURRENT' then
-			self.Time:SetText(("%.1f |cffaf5050%s %.1f|r"):format(duration, "+", self.delay))
+			self.Time:SetFormattedText("%.1f |cffaf5050%s %.1f|r", duration, "+", self.delay)
 		elseif db.castbar.format == 'CURRENTMAX' then
-			self.Time:SetText(("%.1f / %.1f |cffaf5050%s %.1f|r"):format(duration, self.max, "+", self.delay))
+			self.Time:SetFormattedText("%.1f / %.1f |cffaf5050%s %.1f|r", duration, self.max, "+", self.delay)
 		elseif db.castbar.format == 'REMAINING' then
-			self.Time:SetText(("%.1f |cffaf5050%s %.1f|r"):format(abs(duration - self.max), "+", self.delay))
+			self.Time:SetFormattedText("%.1f |cffaf5050%s %.1f|r", abs(duration - self.max), "+", self.delay)
 		end		
 	end
 end
@@ -265,20 +269,19 @@ function UF:CustomTimeText(duration)
 
 	if self.channeling then
 		if db.castbar.format == 'CURRENT' then
-			self.Time:SetText(("%.1f"):format(abs(duration - self.max)))
+			self.Time:SetFormattedText("%.1f", abs(duration - self.max))
 		elseif db.castbar.format == 'CURRENTMAX' then
-			self.Time:SetText(("%.1f / %.1f"):format(duration, self.max))
-			self.Time:SetText(("%.1f / %.1f"):format(abs(duration - self.max), self.max))
+			self.Time:SetFormattedText("%.1f / %.1f", abs(duration - self.max), self.max)
 		elseif db.castbar.format == 'REMAINING' then
-			self.Time:SetText(("%.1f"):format(duration))
+			self.Time:SetFormattedText("%.1f", duration)
 		end				
 	else
 		if db.castbar.format == 'CURRENT' then
-			self.Time:SetText(("%.1f"):format(duration))
+			self.Time:SetFormattedText("%.1f", duration)
 		elseif db.castbar.format == 'CURRENTMAX' then
-			self.Time:SetText(("%.1f / %.1f"):format(duration, self.max))
+			self.Time:SetFormattedText("%.1f / %.1f", duration, self.max)
 		elseif db.castbar.format == 'REMAINING' then
-			self.Time:SetText(("%.1f"):format(abs(duration - self.max)))
+			self.Time:SetFormattedText("%.1f", abs(duration - self.max))
 		end		
 	end
 end
@@ -316,7 +319,7 @@ function UF:PostCastStart(unit, name, rank, castid)
 	if unit == "vehicle" then unit = "player" end
 	
 	if db.castbar.displayTarget and self.curTarget then
-		self.Text:SetText(sub(name..' --> '..self.curTarget, 0, floor((((32/245) * self:GetWidth()) / E.db['unitframe'].fontSize) * 12)))
+		self.Text:SetText(sub(('%s --> %s'):format(name, self.curTarget), 0, floor((((32/245) * self:GetWidth()) / E.db['unitframe'].fontSize) * 12)))
 	else
 		self.Text:SetText(sub(name, 0, floor((((32/245) * self:GetWidth()) / E.db['unitframe'].fontSize) * 12)))
 	end
@@ -566,10 +569,11 @@ function UF:UpdateArcaneCharges(event, unit, arcaneCharges, maxCharges)
 end	
 
 function UF:UpdateHarmony()
-	local maxBars = self.numPoints
 	local frame = self:GetParent()
 	local db = frame.db
 	if not db then return; end
+
+	local maxBars = self.numPoints
 	
 	local UNIT_WIDTH = db.width
 	local BORDER = E.Border
@@ -667,17 +671,29 @@ function UF:UpdateShardBar(spec)
 	UF:UpdatePlayerFrameAnchors(frame, self:IsShown())
 end
 
-function UF:EclipseDirection()
-	local direction = GetEclipseDirection()
-	if direction == "sun" then
-		self.Text:SetText(">")
-		self.Text:SetTextColor(.2,.2,1,1)
-	elseif direction == "moon" then
-		self.Text:SetText("<")
-		self.Text:SetTextColor(1,1,.3, 1)
-	else
-		self.Text:SetText("")
+local eclipsedirection = {
+  ["sun"] = function (frame, change)
+  	frame.Text:SetText(change and "#>" or ">")
+  	frame.Text:SetTextColor(.6, .6, 1, 1) 
+  end,
+  ["moon"] = function (frame, change)
+  	frame.Text:SetText(change and "<#" or "<") 
+  	frame.Text:SetTextColor(1, 1, .4, 1) 
+  end,
+  ["none"] = function (frame, change)
+  	frame.Text:SetText("") 
+  end,
+}
+
+function UF:PredictEclipse(self, energy, direction, virtual_energy, virtual_direction, virtual_eclipse)
+	if self and self:IsShown() then
+		eclipsedirection[virtual_direction](self, direction ~= virtual_direction)
 	end
+end
+
+function UF:EclipseDirection()
+	energy, direction, virtual_energy, virtual_direction, virtual_eclipse = LibBalancePowerTracker:GetEclipseEnergyInfo()
+	eclipsedirection[virtual_direction](self, direction ~= virtual_direction)
 end
 
 function UF:DruidResourceBarVisibilityUpdate(unit)
@@ -691,26 +707,27 @@ end
 function UF:DruidPostUpdateAltPower(unit, min, max)
 	local powerText = self:GetParent().Power.value
 	
-	if min ~= max then
-		local color = ElvUF['colors'].power['MANA']
-		color = E:RGBToHex(color[1], color[2], color[3])
-		
-		self.Text:ClearAllPoints()
-		if powerText:GetText() then
-			if select(4, powerText:GetPoint()) < 0 then
-				self.Text:SetPoint("RIGHT", powerText, "LEFT", 3, 0)
-				self.Text:SetFormattedText(color.."%d%%|r |cffD7BEA5- |r", floor(min / max * 100))			
-			else
-				self.Text:SetPoint("LEFT", powerText, "RIGHT", -3, 0)
-				self.Text:SetFormattedText("|cffD7BEA5-|r"..color.." %d%%|r", floor(min / max * 100))
-			end
-		else
-			self.Text:SetPoint(powerText:GetPoint())
-			self.Text:SetFormattedText(color.."%d%%|r", floor(min / max * 100))
-		end	
-	else
+	if min == max then
 		self.Text:SetText()
+		return	
 	end
+	
+	local color = ElvUF['colors'].power[tokens[0]]
+	color = E:RGBToHex(color[1], color[2], color[3])
+	
+	self.Text:ClearAllPoints()
+	if powerText:GetText() then
+		if select(4, powerText:GetPoint()) < 0 then
+			self.Text:SetPoint("RIGHT", powerText, "LEFT", 3, 0)
+			self.Text:SetFormattedText("%s%d%%|r |cffD7BEA5- |r", color, floor(min / max * 100))			
+		else
+			self.Text:SetPoint("LEFT", powerText, "RIGHT", -3, 0)
+			self.Text:SetFormattedText("|cffD7BEA5-|r%s %d%%|r", color, floor(min / max * 100))
+		end
+	else
+		self.Text:SetPoint(powerText:GetPoint())
+		self.Text:SetFormattedText("%s%d%%|r", color, floor(min / max * 100))
+	end	
 end
 
 function UF:UpdateThreat(event, unit)
@@ -785,11 +802,11 @@ function UF:AltPowerBarPostUpdate(min, cur, max)
 	
 	if unit == "player" and self.text then 
 		local type = select(10, UnitAlternatePowerInfo(unit))
-				
+
 		if perc > 0 then
-			self.text:SetText(type..": "..format("%d%%", perc))
+			self.text:SetFormattedText("%s: %d%%", type, perc)
 		else
-			self.text:SetText(type..": 0%")
+			self.text:SetFormattedText("%s: 0%", type)
 		end
 	elseif unit and unit:find("boss%d") and self.text then
 		self.text:SetTextColor(self:GetStatusBarColor())
@@ -799,7 +816,7 @@ function UF:AltPowerBarPostUpdate(min, cur, max)
 			self.text:Point("RIGHT", parent.Power.value.value, "LEFT", 2, E.mult)	
 		end
 		if perc > 0 then
-			self.text:SetText("|cffD7BEA5[|r"..format("%d%%", perc).."|cffD7BEA5]|r")
+			self.text:SetFormattedText("|cffD7BEA5[|r%d%%|cffD7BEA5]|r", perc)
 		else
 			self.text:SetText(nil)
 		end
@@ -857,8 +874,6 @@ function UF:AuraFilter(unit, icon, name, rank, texture, count, dtype, duration, 
 	if E.global.unitframe.InvalidSpells[spellID] then
 		return false;
 	end
-
-	local isPlayer, isFriend
 
 	local db = self:GetParent().db
 	if not db or not db[self.type] then return true; end
@@ -937,9 +952,10 @@ function UF:AuraFilter(unit, icon, name, rank, texture, count, dtype, duration, 
 		returnValueChanged = true;
 	end	
 
-	if db.useFilter and E.global['unitframe']['aurafilters'][db.useFilter] then
-		local type = E.global['unitframe']['aurafilters'][db.useFilter].type
-		local spellList = E.global['unitframe']['aurafilters'][db.useFilter].spells
+	local useFilter = E.global['unitframe']['aurafilters'][db.useFilter]
+	if db.useFilter and useFilter then
+		local type = useFilter.type
+		local spellList = useFilter.spells
 
 		if type == 'Whitelist' then
 			if spellList[name] and spellList[name].enable then
@@ -947,7 +963,6 @@ function UF:AuraFilter(unit, icon, name, rank, texture, count, dtype, duration, 
 			elseif not returnValueChanged then
 				returnValue = false
 			end
-
 		elseif type == 'Blacklist' and spellList[name] and spellList[name].enable then
 			returnValue = false				
 		end
@@ -965,6 +980,33 @@ local counterOffsets = {
 	['RIGHT'] = {-6, 1},
 	['TOP'] = {0, 0},
 	['BOTTOM'] = {0, 0},
+}
+
+local iconConfiguration = {
+	["coloredIcon"] = function (icon, buff)
+		icon.icon:SetTexture(E["media"].blankTex);
+		
+		if (buff["color"]) then
+			icon.icon:SetVertexColor(buff.color.r, buff.color.g, buff.b)
+		else
+			icon.icon:SetVertexColor(0.8, 0.8, 0.8)
+		end		
+		icon.text:Hide()
+		icon.border:Show()
+	end,
+	["texturedIcon"] = function (icon, buff)
+		icon.icon:SetVertexColor(1, 1, 1)
+		icon.icon:SetTexCoord(.18, .82, .18, .82);
+		icon.icon:SetTexture(icon.image);
+		icon.text:Hide()
+		icon.border:Show();	
+	end,
+	["text"] = function (icon, buff)
+		icon.icon:SetTexture(nil)
+		icon.text:Show()
+		icon.text:SetTextColor(buff.color.r, buff.color.g, buff.color.b)
+		icon.border:Hide()
+	end,
 }
 
 function UF:UpdateAuraWatch(frame)
@@ -1051,29 +1093,8 @@ function UF:UpdateAuraWatch(frame)
 					icon.border:SetVertexColor(0, 0, 0);
 				end
 				
-				if icon.style == 'coloredIcon' then
-					icon.icon:SetTexture(E["media"].blankTex);
-					
-					if (buffs[i]["color"]) then
-						icon.icon:SetVertexColor(buffs[i]["color"].r, buffs[i]["color"].g, buffs[i]["color"].b);
-					else
-						icon.icon:SetVertexColor(0.8, 0.8, 0.8);
-					end		
-					icon.text:Hide()
-					icon.border:Show()
-				elseif icon.style == 'texturedIcon' then
-					icon.icon:SetVertexColor(1, 1, 1)
-					icon.icon:SetTexCoord(.18, .82, .18, .82);
-					icon.icon:SetTexture(icon.image);
-					icon.text:Hide()
-					icon.border:Show()
-				else
-					icon.icon:SetTexture(nil)
-					icon.text:Show()
-					icon.text:SetTextColor(buffs[i].color.r, buffs[i].color.g, buffs[i].color.b)
-					icon.border:Hide()
-				end
-				
+				iconConfiguration[icon.style](icon, buffs[i])
+							
 				if not icon.cd then
 					icon.cd = CreateFrame("Cooldown", nil, icon)
 					icon.cd:SetAllPoints(icon)
@@ -1115,12 +1136,20 @@ function UF:UpdateAuraWatch(frame)
 	buffs = nil;
 end
 
-
 local roleIconTextures = {
 	TANK = [[Interface\AddOns\ElvUI\media\textures\tank.tga]],
 	HEALER = [[Interface\AddOns\ElvUI\media\textures\healer.tga]],
 	DAMAGER = [[Interface\AddOns\ElvUI\media\textures\dps.tga]]
 }
+
+function UF:UpdateRoleIconInterval(elapsed)
+	if not self then return end
+	
+	self.elapsed = (self.elapsed or 0) + elapsed
+	if (self.elapsed < 2) then return end
+
+	UF.UpdateRoleIcon(self)
+end
 
 function UF:UpdateRoleIcon()
 	local lfdrole = self.LFDRole
@@ -1132,16 +1161,22 @@ function UF:UpdateRoleIcon()
 	end
 	
 	local role = UnitGroupRolesAssigned(self.unit)
-	if self.isForced and role == 'NONE' then
-		local rnd = random(1, 3)
-		role = rnd == 1 and "TANK" or (rnd == 2 and "HEALER" or (rnd == 3 and "DAMAGER"))
+	if role == 'NONE' then
+		if self.isForced then
+			local rnd = random(1, 3)
+			role = rnd == 1 and "TANK" or (rnd == 2 and "HEALER" or (rnd == 3 and "DAMAGER"))
+		else
+			_, role = LSR:getRole(UnitGUID(self.unit))
+		end
 	end
 	
-	if role ~= 'NONE' and (self.isForced or UnitIsConnected(self.unit)) then
+	if role and role ~= 'NONE' and (self.isForced or UnitIsConnected(self.unit)) then
+		self:SetScript('OnUpdate', nil)
 		lfdrole:SetTexture(roleIconTextures[role])
 		lfdrole:Show()
 	else
 		lfdrole:Hide()
+		self:SetScript('OnUpdate', UF.UpdateRoleIconInterval)
 	end	
 end
 
@@ -1332,8 +1367,8 @@ function UF:SmartAuraDisplay()
 			anchorPoint, anchorTo = 'TOP', 'BOTTOM'
 		end		
 		auraBars:ClearAllPoints()
-		auraBars:SetPoint(anchorPoint..'LEFT', buffs, anchorTo..'LEFT', 0, yOffset)
-		auraBars:SetPoint(anchorPoint..'RIGHT', buffs, anchorTo..'RIGHT', 0, yOffset)
+		auraBars:SetPoint(format("%sLEFT", anchorPoint), buffs, format("%sLEFT", anchorTo), 0, yOffset)
+		auraBars:SetPoint(format("%sRIGHT", anchorPoint), buffs, format("%sRIGHT", anchorTo), 0, yOffset)
 	end
 	
 	if debuffs:IsShown() then
@@ -1347,7 +1382,7 @@ function UF:SmartAuraDisplay()
 			anchorPoint, anchorTo = 'TOP', 'BOTTOM'
 		end		
 		auraBars:ClearAllPoints()
-		auraBars:SetPoint(anchorPoint..'LEFT', debuffs, anchorTo..'LEFT', 0, yOffset)
-		auraBars:SetPoint(anchorPoint..'RIGHT', debuffs, anchorTo..'RIGHT', 0, yOffset)		
+		auraBars:SetPoint(format("%sLEFT", anchorPoint), buffs, format("%sLEFT", anchorTo), 0, yOffset)
+		auraBars:SetPoint(format("%sRIGHT", anchorPoint), buffs, format("%sRIGHT", anchorTo), 0, yOffset)
 	end
 end
