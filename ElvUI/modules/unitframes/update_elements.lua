@@ -42,31 +42,37 @@ function UF:PostUpdateHealth(unit, min, max)
 	end
 	
 	local r, g, b = self:GetStatusBarColor()
-	local colors = E.db['unitframe']['colors']
-	local mu = self.bg.multiplier or 1
-	
-	if (colors.healthclass and colors.colorhealthbyvalue) or (colors.colorhealthbyvalue and parent.isForced) and not (UnitIsTapped(unit) and not UnitIsTappedByPlayer(unit)) then
-		r, g, b = ElvUF.ColorGradient(min, max, 1, 0, 0, 1, 1, 0, r, g, b)
-		self:SetStatusBarColor(r, g, b)
+	local colors = E.db['unitframe']['colors'];
+	if (colors.healthclass == true and colors.colorhealthbyvalue == true) or (colors.colorhealthbyvalue and parent.isForced) and not (UnitIsTapped(unit) and not UnitIsTappedByPlayer(unit)) then
+		local newr, newg, newb = ElvUF.ColorGradient(min, max, 1, 0, 0, 1, 1, 0, r, g, b)
+
+		self:SetStatusBarColor(newr, newg, newb)
+		if self.bg and self.bg.multiplier then
+			local mu = self.bg.multiplier
+			self.bg:SetVertexColor(newr * mu, newg * mu, newb * mu)
+		end
 	end
 
 	if colors.classbackdrop then
+		local reaction = UnitReaction(unit, 'player')
+		local t
 		if UnitIsPlayer(unit) then
-			r, g, b = unpack(parent.colors.class[select(2, UnitClass(unit))], 1, 3)
-		else
-			local reaction = UnitReaction(unit, 'player')
-		 	if reaction then
-				r, g, b = unpack(parent.colors.reaction[reaction], 1, 3)
-			end
+			local _, class = UnitClass(unit)
+			t = parent.colors.class[class]
+		elseif reaction then
+			t = parent.colors.reaction[reaction]
+		end
+
+		if t then
+			self.bg:SetVertexColor(t[1], t[2], t[3])
 		end
 	end
 	
 	--Backdrop
 	if colors.customhealthbackdrop then
-		r, g, b = colors.health_backdrop.r, colors.health_backdrop.g, colors.health_backdrop.b
+		local backdrop = colors.health_backdrop
+		self.bg:SetVertexColor(backdrop.r, backdrop.g, backdrop.b)		
 	end	
-	
-	self.bg:SetVertexColor(r * mu, g * mu, b * mu)
 end
 
 function UF:PostNamePosition(frame, unit)
@@ -109,21 +115,21 @@ function UF:PostUpdatePower(unit, min, max)
 		end
 	end	
 	
-	if parent.db then
-		if self.LowManaText then
-			if pType == 0 and not UnitIsDeadOrGhost(unit)	and (max == 0 and 0 or floor(min / max * 100)) <= parent.db.lowmana then
-				self.LowManaText:SetFormattedText("%s %s", LOW, MANA)
-				E:Flash(self.LowManaText, 0.6)
-			else
-				self.LowManaText:SetText()
-				E:StopFlash(self.LowManaText)
-			end
+	local db = parent.db
+	if self.LowManaText and db then
+		if pType == 0 and not UnitIsDeadOrGhost(unit)
+			and (max == 0 and 0 or floor(min / max * 100)) <= db.lowmana then
+			self.LowManaText:SetFormattedText("%s %s", LOW, MANA)
+			E:Flash(self.LowManaText, 0.6)
+		else
+			self.LowManaText:SetText()
+			E:StopFlash(self.LowManaText)
 		end
-		
-		if parent.db.power and parent.db.power.hideonnpc then
-			UF:PostNamePosition(parent, unit)
-		end	
 	end
+	
+	if db and db.power and db.power.hideonnpc then
+		UF:PostNamePosition(parent, unit)
+	end	
 end
 
 function UF:PortraitUpdate(unit)
@@ -203,7 +209,7 @@ function UF:PostUpdateAura(unit, button, index, offset, filter, isDebuff, durati
 		if (isStealable) and not isFriend then
 			button:SetBackdropBorderColor(237/255, 234/255, 142/255)
 		else
-			button:SetBackdropBorderColor(unpack(E["media"].bordercolor, 1, 3))		
+			button:SetBackdropBorderColor(unpack(E["media"].bordercolor))		
 		end	
 	end
 
@@ -308,7 +314,7 @@ end
 
 function UF:PostCastStart(unit, name, rank, castid)
 	local db = self:GetParent().db
-	if not db then return end
+	if not db then return; end
 	
 	if unit == "vehicle" then unit = "player" end
 	
@@ -393,9 +399,8 @@ end
 
 function UF:PostChannelUpdate(unit, name)
 	local db = self:GetParent().db
-	if not db then return end
-	
-	if unit == "vehicle" then unit = "player" end
+	if not db then return; end
+    if not (unit == "player" or unit == "vehicle") then return end
 	
 	if db.castbar.ticks then
 		local unitframe = E.global.unitframe
@@ -451,16 +456,17 @@ end
 function UF:PostCastInterruptible(unit)
 	if unit == "vehicle" or unit == "player" then return end
 	
+	local colors = ElvUF.colors
 	if UnitCanAttack("player", unit) then
-		self:SetStatusBarColor(ElvUF.colors.castColor.r, ElvUF.colors.castColor.g, ElvUF.colors.castColor.b)
+		self:SetStatusBarColor(colors.castNoInterrupt[1], colors.castNoInterrupt[2], colors.castNoInterrupt[3])	
 	else
-		-- player cannot attack unit and therefor cannot interrupt the cast
-		self:SetStatusBarColor(ElvUF.colors.castNoInterrupt.r, ElvUF.colors.castNoInterrupt.g, ElvUF.colors.castNoInterrupt.b)	
+		self:SetStatusBarColor(colors.castColor[1], colors.castColor[2], colors.castColor[3])
 	end
 end
 
 function UF:PostCastNotInterruptible(unit)
-	self:SetStatusBarColor(ElvUF.colors.castNoInterrupt.r, ElvUF.colors.castNoInterrupt.g, ElvUF.colors.castNoInterrupt.b)
+	local colors = ElvUF.colors
+	self:SetStatusBarColor(colors.castNoInterrupt[1], colors.castNoInterrupt[2], colors.castNoInterrupt[3])
 end
 
 function UF:UpdateHoly(event, unit, powerType)
@@ -675,7 +681,7 @@ local eclipsedirection = {
   	frame.Text:SetTextColor(1, 1, .4, 1) 
   end,
   ["none"] = function (frame, change)
-  	frame.Text:SetText() 
+  	frame.Text:SetText("") 
   end,
 }
 
@@ -706,7 +712,8 @@ function UF:DruidPostUpdateAltPower(unit, min, max)
 		return	
 	end
 	
-	local color = E:RGBToHex(unpack(ElvUF['colors'].power[tokens[0]], 1, 3))
+	local color = ElvUF['colors'].power[tokens[0]]
+	color = E:RGBToHex(color[1], color[2], color[3])
 	
 	self.Text:ClearAllPoints()
 	if powerText:GetText() then
@@ -753,20 +760,27 @@ function UF:UpdateThreat(event, unit)
 end
 
 function UF:UpdateTargetGlow(event)
-	if not self.unit then return end
+	if not self.unit then return; end
 	local unit = self.unit
 	
 	if UnitIsUnit(unit, 'target') then
-		local color	
-		if UnitIsPlayer(unit) then
-			local class = select(2, UnitClass(unit))
-			if class then color = RAID_CLASS_COLORS[class] end
-		else
-			local reaction = UnitReaction(unit, 'player')
-			 if reaction then color = FACTION_BAR_COLORS[reaction] end
-		end
-		self.TargetGlow:SetBackdropBorderColor(unpack(color or E.KnownColors.White, 1, 3))
 		self.TargetGlow:Show()
+		local reaction = UnitReaction(unit, 'player')
+		
+		if UnitIsPlayer(unit) then
+			local _, class = UnitClass(unit)
+			if class then
+				local color = RAID_CLASS_COLORS[class]
+				self.TargetGlow:SetBackdropBorderColor(color.r, color.g, color.b)
+			else
+				self.TargetGlow:SetBackdropBorderColor(1, 1, 1)
+			end
+		elseif reaction then
+			local color = FACTION_BAR_COLORS[reaction]
+			self.TargetGlow:SetBackdropBorderColor(color.r, color.g, color.b)
+		else
+			self.TargetGlow:SetBackdropBorderColor(1, 1, 1)
+		end
 	else
 		self.TargetGlow:Hide()
 	end
@@ -776,9 +790,16 @@ function UF:AltPowerBarPostUpdate(min, cur, max)
 	local perc = floor((cur/max)*100)
 	local parent = self:GetParent()
 	
-	self:SetStatusBarColor(unpack(perc < 35 and E.KnownColors.Green or perc < 70 and E.KnownColors.Yellow or E.KnownColors.Red, 1, 3)) 
+	if perc < 35 then
+		self:SetStatusBarColor(0, 1, 0)
+	elseif perc < 70 then
+		self:SetStatusBarColor(1, 1, 0)
+	else
+		self:SetStatusBarColor(1, 0, 0)
+	end
 	
-	local unit = parent.unit	
+	local unit = parent.unit
+	
 	if unit == "player" and self.text then 
 		local type = select(10, UnitAlternatePowerInfo(unit))
 
@@ -797,7 +818,7 @@ function UF:AltPowerBarPostUpdate(min, cur, max)
 		if perc > 0 then
 			self.text:SetFormattedText("|cffD7BEA5[|r%d%%|cffD7BEA5]|r", perc)
 		else
-			self.text:SetText()
+			self.text:SetText(nil)
 		end
 	end
 end
