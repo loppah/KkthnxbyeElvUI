@@ -4,22 +4,11 @@ local DT = E:GetModule('DataTexts')
 local TANK_ICON = "|TInterface\\AddOns\\ElvUI\\media\\textures\\tank.tga:14:14|t"
 local HEALER_ICON = "|TInterface\\AddOns\\ElvUI\\media\\textures\\healer.tga:14:14|t"
 local DPS_ICON = "|TInterface\\AddOns\\ElvUI\\media\\textures\\dps.tga:14:14|t"
-local NOBONUSREWARDS = BATTLEGROUND_HOLIDAY..": N/A"
+local NOBONUSREWARDS = ("%s: N/A"):format(BATTLEGROUND_HOLIDAY)
 local lastPanel
 
 local function MakeIconString(tank, healer, damage)
-	local str = ""
-	if tank then
-		str = str..TANK_ICON
-	end
-	if healer then
-		str = str..HEALER_ICON
-	end
-	if damage then
-		str = str..DPS_ICON
-	end	
-
-	return str
+	return ("%s%s%s"):format(tank and TANK_ICON or '', healer and HEALER_ICON or '', damage and DPS_ICON or '')
 end
 
 local function OnEvent(self, event, ...)
@@ -50,7 +39,7 @@ local function OnClick()
 end
 
 local function ValueColorUpdate(hex, r, g, b)
-	NOBONUSREWARDS = BATTLEGROUND_HOLIDAY..": "..hex.."N/A|r"
+	NOBONUSREWARDS = ("%s: %sN/A|r"):format(BATTLEGROUND_HOLIDAY, hex)
 	
 	if lastPanel ~= nil then
 		OnEvent(lastPanel)

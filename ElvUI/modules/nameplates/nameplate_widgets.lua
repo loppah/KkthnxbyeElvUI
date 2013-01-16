@@ -4,9 +4,10 @@ local NP = E:GetModule('NamePlates')
 local GetTime = GetTime
 
 local ceil = math.ceil
-local wipe = table.wipe
+local twipe = table.wipe
 local band = bit.band
-local format = string.format
+local format, join = string.format, string.join
+local pairs, select, tonumber, unpack = pairs, select, tonumber, unpack
 
 --[[
 	This file handles functions for the Castbar and Debuff modules of nameplates.
@@ -43,10 +44,6 @@ local AURA_TYPE = {
 	["Poison"] = 5,
 	["Debuff"] = 6,
 }
-
-local band = bit.band
-local ceil = math.ceil
-local twipe = table.wipe
 
 NP.RaidIconCoordinate = {
 	[0]		= { [0]		= "STAR", [0.25]	= "MOON", },
@@ -615,7 +612,7 @@ function NP:UpdateRoster()
 		groupSize = 1
 	end
 	
-	wipe(self.GroupMembers)
+	twipe(self.GroupMembers)
 	
 	-- Cycle through Group
 	if groupType then
@@ -660,7 +657,7 @@ end
 
 function NP:GetAuraInstance(guid, aura_id)
 	if guid and aura_id then
-		local aura_instance_id = guid..aura_id
+		local aura_instance_id = join('', guid, aura_id)
 		return self.Aura_Spellid[aura_instance_id], self.Aura_Expiration[aura_instance_id], self.Aura_Stacks[aura_instance_id], self.Aura_Caster[aura_instance_id], self.Aura_Duration[aura_instance_id], self.Aura_Texture[aura_instance_id], self.Aura_Type[aura_instance_id], self.Aura_Target[aura_instance_id]
 	end
 end
@@ -689,7 +686,7 @@ function NP:UpdateIconGrid(frame, guid)
 	local AuraSlotIndex = 1
 	local instanceid
 	
-	self.DebuffCache = wipe(self.DebuffCache)
+	self.DebuffCache = twipe(self.DebuffCache)
 	local debuffCount = 0
 	
 	-- Cache displayable debuffs
@@ -728,7 +725,7 @@ function NP:UpdateIconGrid(frame, guid)
 	-- Clear Extra Slots
 	for AuraSlotIndex = AuraSlotIndex, ((frame.isSmallNP and NP.db.smallPlates) and NP.MAX_SMALLNP_DISPLAYABLE_DEBUFFS or NP.MAX_DISPLAYABLE_DEBUFFS) do self:UpdateIcon(AuraIconFrames[AuraSlotIndex]) end
 	
-	self.DebuffCache = wipe(self.DebuffCache)
+	self.DebuffCache = twipe(self.DebuffCache)
 end
 
 function NP:UpdateDebuffs(frame)
@@ -785,7 +782,7 @@ function NP:UpdateAurasByUnitID(unit)
 end
 
 function NP:UNIT_TARGET()
-	self.TargetOfGroupMembers = wipe(self.TargetOfGroupMembers)
+	self.TargetOfGroupMembers = twipe(self.TargetOfGroupMembers)
 	
 	for name, unitid in pairs(self.GroupMembers) do
 		local targetOf = ("%starget"):format(unitid)

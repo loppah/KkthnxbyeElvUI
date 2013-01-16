@@ -7,10 +7,10 @@ local format = string.format
 function UF:SpawnMenu()
 	local unit = E:StringTitle(self.unit)
 	if self.unit:find("targettarget") then return; end
-	if _G[unit.."FrameDropDown"] then
-		ToggleDropDownMenu(1, nil, _G[unit.."FrameDropDown"], "cursor")
+	if _G[("%sFrameDropDown"):format(unit)] then
+		ToggleDropDownMenu(1, nil, _G[("%sFrameDropDown"):format(unit)], "cursor")
 	elseif (self.unit:match("party")) then
-		ToggleDropDownMenu(1, nil, _G["PartyMemberFrame"..self.id.."DropDown"], "cursor")
+		ToggleDropDownMenu(1, nil, _G[("PartyMemberFrame%dDropDown"):format(self.id)], "cursor")
 	else
 		FriendsDropDown.unit = self.unit
 		FriendsDropDown.id = self.id
@@ -259,7 +259,7 @@ function UF:Construct_Castbar(self, direction, moverName)
 	castbar.Holder = holder
 	
 	if moverName then
-		E:CreateMover(castbar.Holder, self:GetName()..'CastbarMover', moverName, nil, -6, nil, 'ALL,SOLO')
+		E:CreateMover(castbar.Holder, ('%sCastbarMover'):format(self:GetName()), moverName, nil, -6, nil, 'ALL,SOLO')
 	end
 
 	local icon = button:CreateTexture(nil, "ARTWORK")

@@ -7,6 +7,8 @@ local iconSize = 30;
 
 local max = math.max
 local tinsert = table.insert
+local pairs = pairs
+local join = string.join
 
 local sq, ss, sn
 local OnEnter = function(self)
@@ -76,7 +78,7 @@ end
 
 local function createSlot(id)
 	local iconsize = iconSize-2
-	local frame = CreateFrame("Button", 'ElvLootSlot'..id, lootFrame)
+	local frame = CreateFrame("Button", ('ElvLootSlot%d'):format(id), lootFrame)
 	frame:Point("LEFT", 8, 0)
 	frame:Point("RIGHT", -8, 0)
 	frame:Height(iconsize)
@@ -290,7 +292,7 @@ function M:LoadLoot()
 
 	function _G.GroupLootDropDown_GiveLoot(self)
 		if ( sq >= MASTER_LOOT_THREHOLD ) then
-			local dialog = E:StaticPopup_Show("CONFIRM_LOOT_DISTRIBUTION", ITEM_QUALITY_COLORS[sq].hex..sn..FONT_COLOR_CODE_CLOSE, self:GetText())
+			local dialog = E:StaticPopup_Show("CONFIRM_LOOT_DISTRIBUTION", join('', ITEM_QUALITY_COLORS[sq].hex, sn, FONT_COLOR_CODE_CLOSE), self:GetText())
 			if (dialog) then
 				dialog.data = self.value
 			end

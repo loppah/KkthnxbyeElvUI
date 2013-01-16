@@ -3,11 +3,13 @@ local UF = E:GetModule('UnitFrames');
 local LSM = LibStub("LibSharedMedia-3.0");
 local LSR = LibStub("LibSpecRoster-1.0")
 
-local sub = string.sub
-local abs, random, floor, ceil = math.abs, math.random, math.floor, math.ceil
 local _, ns = ...
 local ElvUF = ns.oUF
 assert(ElvUF, "ElvUI was unable to locate oUF.")
+
+local sub = string.sub
+local abs, random, floor, ceil = math.abs, math.random, math.floor, math.ceil
+local pairs, type, select, unpack = pairs, type, select, unpack
 
 local unitframeFont
 
@@ -41,37 +43,29 @@ function UF:PostUpdateHealth(unit, min, max)
 		parent.ResurrectIcon:SetAlpha(min == 0 and 1 or 0)
 	end
 	
-	local r, g, b = self:GetStatusBarColor()
-	local colors = E.db['unitframe']['colors'];
-	if (colors.healthclass == true and colors.colorhealthbyvalue == true) or (colors.colorhealthbyvalue and parent.isForced) and not (UnitIsTapped(unit) and not UnitIsTappedByPlayer(unit)) then
-		local newr, newg, newb = ElvUF.ColorGradient(min, max, 1, 0, 0, 1, 1, 0, r, g, b)
-
-		self:SetStatusBarColor(newr, newg, newb)
-		if self.bg and self.bg.multiplier then
-			local mu = self.bg.multiplier
-			self.bg:SetVertexColor(newr * mu, newg * mu, newb * mu)
-		end
+	local colors = E.db['unitframe']['colors']	
+	if (colors.healthclass and colors.colorhealthbyvalue) or (colors.colorhealthbyvalue and parent.isForced) and not (UnitIsTapped(unit) and not UnitIsTappedByPlayer(unit)) then
+		local r, g, b = self:GetStatusBarColor()
+		r, g, b = ElvUF.ColorGradient(min, max, 1, 0, 0, 1, 1, 0, r, g, b)
+		self:SetStatusBarColor(r, g, b)
+		local mu = self.bg.multiplier or 1
+		self.bg:SetVertexColor(r * mu, g * mu, b * mu)
 	end
 
 	if colors.classbackdrop then
-		local reaction = UnitReaction(unit, 'player')
-		local t
 		if UnitIsPlayer(unit) then
-			local _, class = UnitClass(unit)
-			t = parent.colors.class[class]
-		elseif reaction then
-			t = parent.colors.reaction[reaction]
-		end
-
-		if t then
-			self.bg:SetVertexColor(t[1], t[2], t[3])
+			self.bg:SetVertexColor(unpack(ElvUF.colors.class[select(2, UnitClass(unit))], 1, 3))
+		else
+			local reaction = UnitReaction(unit, 'player')
+		 	if reaction then
+				self.bg:SetVertexColor(unpack(ElvUF.colors.reaction[reaction], 1, 3))
+			end
 		end
 	end
 	
 	--Backdrop
 	if colors.customhealthbackdrop then
-		local backdrop = colors.health_backdrop
-		self.bg:SetVertexColor(backdrop.r, backdrop.g, backdrop.b)		
+		self.bg:SetVertexColor(colors.health_backdrop.r, colors.health_backdrop.g, colors.health_backdrop.b)		
 	end	
 end
 
@@ -79,14 +73,11 @@ function UF:PostNamePosition(frame, unit)
 	if not frame.Power.value:IsShown() then return end
 	
 	if UnitIsPlayer(unit) then
-		local db = frame.db
-		
-		local position = db.name.position
-		local x, y = self:GetPositionOffset(position)
+		local position = frame.db.name.position
 		frame.Power.value:SetAlpha(1)
 		
 		frame.Name:ClearAllPoints()
-		frame.Name:Point(position, frame.Health, position, x, y)	
+		frame.Name:Point(position, frame.Health, position, self:GetPositionOffset(position))	
 	else
 		frame.Power.value:SetAlpha(0)
 		
@@ -98,7 +89,7 @@ end
 local tokens = { [0] = "MANA", "RAGE", "FOCUS", "ENERGY", [6] = "RUNIC_POWER" }
 
 function UF:PostUpdatePower(unit, min, max)
-	local pType, _, altR, altG, altB = UnitPowerType(unit)
+	local pType = UnitPowerType(unit)
 	local parent = self:GetParent()
 	
 	if parent.isForced then
@@ -106,30 +97,30 @@ function UF:PostUpdatePower(unit, min, max)
 		pType = random(0, 4)
 		pType = pType == 4 and 6 or pType
 		self:SetValue(min)
-		
-		if not self.colorClass then
-			local color = ElvUF['colors'].power[tokens[pType]]
-			self:SetStatusBarColor(color[1], color[2], color[3])
-			local mu = self.bg.multiplier or 1
-			self.bg:SetVertexColor(color[1] * mu, color[2] * mu, color[3] * mu)
-		end
 	end	
-	
-	local db = parent.db
-	if self.LowManaText and db then
-		if pType == 0 and not UnitIsDeadOrGhost(unit)
-			and (max == 0 and 0 or floor(min / max * 100)) <= db.lowmana then
-			self.LowManaText:SetFormattedText("%s %s", LOW, MANA)
-			E:Flash(self.LowManaText, 0.6)
-		else
-			self.LowManaText:SetText()
-			E:StopFlash(self.LowManaText)
-		end
+		
+	if not self.colorClass then
+		local color = ElvUF.colors.power[tokens[pType]]
+		self:SetStatusBarColor(color[1], color[2], color[3])
+		local mu = self.bg.multiplier or 1
+		self.bg:SetVertexColor(color[1] * mu, color[2] * mu, color[3] * mu)
 	end
 	
-	if db and db.power and db.power.hideonnpc then
-		UF:PostNamePosition(parent, unit)
-	end	
+	if parent.db then
+		if self.LowManaText then
+			if pType == 0 and not UnitIsDeadOrGhost(unit)	and (max == 0 and 0 or floor(min / max * 100)) <= parent.db.lowmana then
+				self.LowManaText:SetFormattedText("%s %s", LOW, MANA)
+				E:Flash(self.LowManaText, 0.6)
+			else
+				self.LowManaText:SetText()
+				E:StopFlash(self.LowManaText)
+			end
+		end
+		
+		if parent.db.power and parent.db.power.hideonnpc then
+			UF:PostNamePosition(parent, unit)
+		end	
+	end
 end
 
 function UF:PortraitUpdate(unit)
@@ -139,8 +130,8 @@ function UF:PortraitUpdate(unit)
 	
 	local portrait = db.portrait
 	if portrait.enable and portrait.overlay then
-		self:SetAlpha(0); 
-		self:SetAlpha(0.35);
+		self:SetAlpha(0)
+		self:SetAlpha(0.35)
 	else
 		self:SetAlpha(1)
 	end
@@ -180,7 +171,7 @@ function UF:PostUpdateAura(unit, button, index, offset, filter, isDebuff, durati
 	
 	if db and db[self.type] then
 		unitframeFont = unitframeFont or LSM:Fetch("font", E.db['unitframe'].font)
-	
+
 		button.text:FontTemplate(unitframeFont, db[self.type].fontSize, 'OUTLINE')
 		button.count:FontTemplate(unitframeFont, db[self.type].fontSize, 'OUTLINE')
 		
@@ -232,7 +223,8 @@ function UF:PostUpdateAura(unit, button, index, offset, filter, isDebuff, durati
 			button.expiration = expiration - GetTime()
 			button.nextupdate = 0.05
 		end
-	else
+	end	
+	if duration == 0 or expiration == 0 then
 		button:SetScript('OnUpdate', nil)
 		if button.text:GetFont() then
 			button.text:SetText('')
@@ -314,7 +306,7 @@ end
 
 function UF:PostCastStart(unit, name, rank, castid)
 	local db = self:GetParent().db
-	if not db then return; end
+	if not db then return end
 	
 	if unit == "vehicle" then unit = "player" end
 	
@@ -399,8 +391,9 @@ end
 
 function UF:PostChannelUpdate(unit, name)
 	local db = self:GetParent().db
-	if not db then return; end
-    if not (unit == "player" or unit == "vehicle") then return end
+	if not db then return end
+	
+	if unit == "vehicle" then unit = "player" end
 	
 	if db.castbar.ticks then
 		local unitframe = E.global.unitframe
@@ -456,17 +449,16 @@ end
 function UF:PostCastInterruptible(unit)
 	if unit == "vehicle" or unit == "player" then return end
 	
-	local colors = ElvUF.colors
 	if UnitCanAttack("player", unit) then
-		self:SetStatusBarColor(colors.castNoInterrupt[1], colors.castNoInterrupt[2], colors.castNoInterrupt[3])	
+		self:SetStatusBarColor(ElvUF.colors.castColor.r, ElvUF.colors.castColor.g, ElvUF.colors.castColor.b)
 	else
-		self:SetStatusBarColor(colors.castColor[1], colors.castColor[2], colors.castColor[3])
+		-- player cannot attack unit and therefor cannot interrupt the cast
+		self:SetStatusBarColor(ElvUF.colors.castNoInterrupt.r, ElvUF.colors.castNoInterrupt.g, ElvUF.colors.castNoInterrupt.b)	
 	end
 end
 
 function UF:PostCastNotInterruptible(unit)
-	local colors = ElvUF.colors
-	self:SetStatusBarColor(colors.castNoInterrupt[1], colors.castNoInterrupt[2], colors.castNoInterrupt[3])
+	self:SetStatusBarColor(ElvUF.colors.castNoInterrupt.r, ElvUF.colors.castNoInterrupt.g, ElvUF.colors.castNoInterrupt.b)
 end
 
 function UF:UpdateHoly(event, unit, powerType)
@@ -571,10 +563,9 @@ end
 function UF:UpdateHarmony()
 	local frame = self:GetParent()
 	local db = frame.db
-	if not db then return; end
+	if not db then return end
 
 	local maxBars = self.numPoints
-	
 	local UNIT_WIDTH = db.width
 	local BORDER = E.Border
 	local CLASSBAR_WIDTH = db.width - (BORDER*2)
@@ -681,7 +672,7 @@ local eclipsedirection = {
   	frame.Text:SetTextColor(1, 1, .4, 1) 
   end,
   ["none"] = function (frame, change)
-  	frame.Text:SetText("") 
+  	frame.Text:SetText() 
   end,
 }
 
@@ -712,8 +703,7 @@ function UF:DruidPostUpdateAltPower(unit, min, max)
 		return	
 	end
 	
-	local color = ElvUF['colors'].power[tokens[0]]
-	color = E:RGBToHex(color[1], color[2], color[3])
+	local color = E:RGBToHex(unpack(ElvUF.colors.power[tokens[0]], 1, 3))
 	
 	self.Text:ClearAllPoints()
 	if powerText:GetText() then
@@ -764,23 +754,18 @@ function UF:UpdateTargetGlow(event)
 	local unit = self.unit
 	
 	if UnitIsUnit(unit, 'target') then
-		self.TargetGlow:Show()
-		local reaction = UnitReaction(unit, 'player')
+		local r, g, b = unpack(E.KnownColors.White, 1, 3)
 		
 		if UnitIsPlayer(unit) then
-			local _, class = UnitClass(unit)
-			if class then
-				local color = RAID_CLASS_COLORS[class]
-				self.TargetGlow:SetBackdropBorderColor(color.r, color.g, color.b)
-			else
-				self.TargetGlow:SetBackdropBorderColor(1, 1, 1)
-			end
-		elseif reaction then
-			local color = FACTION_BAR_COLORS[reaction]
-			self.TargetGlow:SetBackdropBorderColor(color.r, color.g, color.b)
+			r, g, b = unpack(ElvUF.colors.class[select(2, UnitClass(unit))], 1, 3)
 		else
-			self.TargetGlow:SetBackdropBorderColor(1, 1, 1)
+			local reaction = UnitReaction(unit, 'player')
+			if reaction then
+				r, g, b = unpack(ElvUF.colors.reaction[reaction], 1, 3)
+			end
 		end
+		self.TargetGlow:SetBackdropBorderColor(r, g, b)
+		self.TargetGlow:Show()
 	else
 		self.TargetGlow:Hide()
 	end
@@ -818,7 +803,7 @@ function UF:AltPowerBarPostUpdate(min, cur, max)
 		if perc > 0 then
 			self.text:SetFormattedText("|cffD7BEA5[|r%d%%|cffD7BEA5]|r", perc)
 		else
-			self.text:SetText(nil)
+			self.text:SetText()
 		end
 	end
 end
@@ -956,7 +941,6 @@ function UF:AuraFilter(unit, icon, name, rank, texture, count, dtype, duration, 
 	if db.useFilter and useFilter then
 		local type = useFilter.type
 		local spellList = useFilter.spells
-
 		if type == 'Whitelist' then
 			if spellList[name] and spellList[name].enable then
 				returnValue = true	
@@ -1094,7 +1078,7 @@ function UF:UpdateAuraWatch(frame)
 				end
 				
 				iconConfiguration[icon.style](icon, buffs[i])
-							
+				
 				if not icon.cd then
 					icon.cd = CreateFrame("Cooldown", nil, icon)
 					icon.cd:SetAllPoints(icon)

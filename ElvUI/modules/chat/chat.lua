@@ -13,8 +13,9 @@ local cvars = {
 	["whisperMode"] = true,
 }
 
-local len, gsub, find, sub, gmatch, format, random = string.len, string.gsub, string.find, string.sub, string.gmatch, string.format, math.random
+local len, gsub, find, sub, gmatch, format, join, random = string.len, string.gsub, string.find, string.sub, string.gmatch, string.format, string.join, math.random
 local tinsert, tremove, tsort, twipe, tconcat = table.insert, table.remove, table.sort, table.wipe, table.concat
+local pairs, select, unpack = pairs, select, unpack
 
 local TIMESTAMP_FORMAT
 local DEFAULT_STRINGS = {
@@ -162,7 +163,7 @@ end
 
 function CH:InsertEmotions(msg)
 	for k,v in pairs(smileyKeys) do
-		msg = gsub(msg,k,"|T"..smileyPack[v]..":16|t");
+		msg = gsub(msg, k, join('', "|T", smileyPack[v], ":16|t"))
 	end
 	return msg;
 end
@@ -180,13 +181,13 @@ function CH:GetSmileyReplacementText(msg)
 		if(pos ~= nil) then
 			endpos = pos;
 		end
-		outstr = outstr .. CH:InsertEmotions(sub(msg,startpos,endpos)); --run replacement on this bit
+		outstr = join('', outstr, CH:InsertEmotions(sub(msg,startpos,endpos))); --run replacement on this bit
 		startpos = endpos + 1;
 		if(pos ~= nil) then
 			endpos = find(msg,"|h]|r",startpos,-1) or find(msg,"|h",startpos,-1);
 			endpos = endpos or origlen;
 			if(startpos < endpos) then
-				outstr = outstr .. sub(msg,startpos,endpos); --don't run replacement on this bit
+				outstr = join('', outstr, sub(msg,startpos,endpos)); --don't run replacement on this bit
 				startpos = endpos + 1;
 			end
 		end
@@ -198,7 +199,7 @@ end
 
 function CH:StyleChat(frame)
 	local name = frame:GetName()
-	_G[name.."TabText"]:FontTemplate(LSM:Fetch("font", self.db.tabFont), self.db.tabFontSize, self.db.tabFontOutline)
+	_G[("%sTabText"):format(name)]:FontTemplate(LSM:Fetch("font", self.db.tabFont), self.db.tabFontSize, self.db.tabFontOutline)
 	
 	if frame.styled then return end
 	
@@ -206,13 +207,12 @@ function CH:StyleChat(frame)
 	
 	local id = frame:GetID()
 	
-	local tab = _G[name..'Tab']
-	local editbox = _G[name..'EditBox']
-	
+	local tab = _G[('%sTab'):format(name)]
+	local editbox = _G[('%sEditBox'):format(name)]
 	for _, texName in pairs(tabTexs) do
-		_G[tab:GetName()..texName..'Left']:SetTexture(nil)
-		_G[tab:GetName()..texName..'Middle']:SetTexture(nil)
-		_G[tab:GetName()..texName..'Right']:SetTexture(nil)
+		_G[('%s%sLeft'):format(tab:GetName(), texName)]:SetTexture(nil)
+		_G[('%s%sMiddle'):format(tab:GetName(), texName)]:SetTexture(nil)
+		_G[('%s%sRight'):format(tab:GetName(), texName)]:SetTexture(nil)
 	end
 
 	hooksecurefunc(tab, "SetAlpha", function(t, alpha)
@@ -221,7 +221,7 @@ function CH:StyleChat(frame)
 		end
 	end)
 
-	tab.text = _G[name.."TabText"]
+	tab.text = _G[("%sTabText"):format(name)]
 	tab.text:SetTextColor(unpack(E["media"].rgbvaluecolor))
 	hooksecurefunc(tab.text, "SetTextColor", function(t, r, g, b, a)
 		local rR, gG, bB = unpack(E["media"].rgbvaluecolor)
@@ -239,12 +239,12 @@ function CH:StyleChat(frame)
 	frame:SetClampRectInsets(0,0,0,0)
 	frame:SetClampedToScreen(false)
 	frame:StripTextures(true)
-	_G[name..'ButtonFrame']:Kill()
+	_G[('%sButtonFrame'):format(name)]:Kill()
 
 	local a, b, c = select(6, editbox:GetRegions()); a:Kill(); b:Kill(); c:Kill()
-	_G[format(editbox:GetName().."FocusLeft", id)]:Kill()
-	_G[format(editbox:GetName().."FocusMid", id)]:Kill()
-	_G[format(editbox:GetName().."FocusRight", id)]:Kill()	
+	_G[format(("%sFocusLeft"):format(editbox:GetName()), id)]:Kill()
+	_G[format(("%sFocusMid"):format(editbox:GetName()), id)]:Kill()
+	_G[format(("%sFocusRight"):format(editbox:GetName()), id)]:Kill()	
 	editbox:SetTemplate('Default', true)
 	editbox:SetAltArrowKeyMode(false)
 	editbox:HookScript("OnEditFocusGained", function(self) self:Show(); if not LeftChatPanel:IsShown() then LeftChatPanel.editboxforced = true; LeftChatToggleButton:GetScript('OnEnter')(LeftChatToggleButton) end end)
@@ -277,7 +277,7 @@ function CH:StyleChat(frame)
 				unitname, realm = UnitName("target")
 				if unitname then unitname = gsub(unitname, " ", "") end
 				if unitname and not UnitIsSameServer("player", "target") then
-					unitname = unitname .. "-" .. gsub(realm, " ", "")
+					unitname = join('', UnitName, "-", gsub(realm, " ", ""))
 				end
 				ChatFrame_SendTell((unitname or L['Invalid Target']), ChatFrame1)
 			end
@@ -306,7 +306,7 @@ function CH:StyleChat(frame)
 			if id == 0 then
 				editbox:SetBackdropBorderColor(unpack(E.media.bordercolor))
 			else
-				editbox:SetBackdropBorderColor(ChatTypeInfo[type..id].r,ChatTypeInfo[type..id].g,ChatTypeInfo[type..id].b)
+				editbox:SetBackdropBorderColor(ChatTypeInfo[("%s%d"):format(type, id)].r,ChatTypeInfo[("%s%d"):format(type, id)].g,ChatTypeInfo[("%s%d"):format(type, id)].b)
 			end
 		elseif type then
 			editbox:SetBackdropBorderColor(ChatTypeInfo[type].r,ChatTypeInfo[type].g,ChatTypeInfo[type].b)
@@ -366,7 +366,7 @@ function CH:CopyChat(frame)
 end
 
 function CH:OnEnter(frame)
-	_G[frame:GetName().."Text"]:Show()
+	_G[("%sText"):format(frame:GetName())]:Show()
 	
 	if frame.conversationIcon then
 		frame.conversationIcon:Show()
@@ -374,7 +374,7 @@ function CH:OnEnter(frame)
 end
 
 function CH:OnLeave(frame)
-	_G[frame:GetName().."Text"]:Hide()
+	_G[("%sText"):format(frame:GetName())]:Hide()
 	
 	if frame.conversationIcon then
 		frame.conversationIcon:Hide()
@@ -392,13 +392,13 @@ function CH:SetupChatTabs(frame, hook)
 	end
 	
 	if not hook then
-		_G[frame:GetName().."Text"]:Show()
+		_G[("%sText"):format(frame:GetName())]:Show()
 		
 		if frame.conversationIcon then
 			frame.conversationIcon:Show()
 		end
 	elseif GetMouseFocus() ~= frame then
-		_G[frame:GetName().."Text"]:Hide()
+		_G[("%sText"):format(frame:GetName())]:Hide()
 		
 		if frame.conversationIcon then 
 			frame.conversationIcon:Hide()
@@ -408,7 +408,7 @@ end
 
 function CH:UpdateAnchors()
 	for _, frameName in pairs(CHAT_FRAMES) do
-		local frame = _G[frameName..'EditBox']
+		local frame = _G[('%sEditBox'):format(frameName)]
 		if not frame then break; end
 		if E.db.datatexts.leftChatPanel and E.db.chat.editBoxPosition == 'BELOW_CHAT' then
 			frame:SetAllPoints(LeftChatDataPanel)
@@ -537,7 +537,7 @@ end
 
 local function UpdateChatTabColor(hex, r, g, b)
 	for i=1, CreatedFrames do
-		_G['ChatFrame'..i..'TabText']:SetTextColor(r, g, b)
+		_G[('ChatFrame%dTabText'):format(i)]:SetTextColor(r, g, b)
 	end
 end
 E['valueColorUpdateFuncs'][UpdateChatTabColor] = true
@@ -718,7 +718,7 @@ function CH:ChatFrame_MessageEventHandler(event, ...)
 					-- arg9 is the channel name without the number in front...
 					if ( ((arg7 > 0) and (self.zoneChannelList[index] == arg7)) or (strupper(value) == strupper(arg9)) ) then
 						found = 1;
-						infoType = "CHANNEL"..arg8;
+						infoType = ("CHANNEL%s"):format(arg8)
 						info = ChatTypeInfo[infoType];
 						if ( (type == "CHANNEL_NOTICE") and (arg1 == "YOU_LEFT") ) then
 							self.channelList[index] = nil;
@@ -800,9 +800,9 @@ function CH:ChatFrame_MessageEventHandler(event, ...)
 		elseif ( strsub(type,1,10) == "BG_SYSTEM_" ) then
 			self:AddMessage(CH:ConcatenateTimeStamp(arg1), info.r, info.g, info.b, info.id);
 		elseif ( strsub(type,1,11) == "ACHIEVEMENT" ) then
-			self:AddMessage(format(CH:ConcatenateTimeStamp(arg1), "|Hplayer:"..arg2.."|h".."["..coloredName.."]".."|h"), info.r, info.g, info.b, info.id);
+			self:AddMessage(format(CH:ConcatenateTimeStamp(arg1), ("|Hplayer:%s|h[%s]|h"):format(arg2, coloredName), info.r, info.g, info.b, info.id))
 		elseif ( strsub(type,1,18) == "GUILD_ACHIEVEMENT" ) then
-			self:AddMessage(format(CH:ConcatenateTimeStamp(arg1), "|Hplayer:"..arg2.."|h".."["..coloredName.."]".."|h"), info.r, info.g, info.b, info.id);
+			self:AddMessage(format(CH:ConcatenateTimeStamp(arg1), ("|Hplayer:%s|h[%s]|h"):format(arg2, coloredName), info.r, info.g, info.b, info.id))
 		elseif ( type == "IGNORED" ) then
 			self:AddMessage(format(CH:ConcatenateTimeStamp(CHAT_IGNORED), arg2), info.r, info.g, info.b, info.id);
 		elseif ( type == "FILTERED" ) then
@@ -811,16 +811,12 @@ function CH:ChatFrame_MessageEventHandler(event, ...)
 			self:AddMessage(CH:ConcatenateTimeStamp(CHAT_RESTRICTED), info.r, info.g, info.b, info.id);
 		elseif ( type == "CHANNEL_LIST") then
 			if(channelLength > 0) then
-				self:AddMessage(format(CH:ConcatenateTimeStamp(_G["CHAT_"..type.."_GET"]..arg1), tonumber(arg8), arg4), info.r, info.g, info.b, info.id);
+				self:AddMessage(format(CH:ConcatenateTimeStamp(_G["CHAT_CHANNEL_LIST_GET"]..arg1), tonumber(arg8), arg4), info.r, info.g, info.b, info.id);
 			else
 				self:AddMessage(CH:ConcatenateTimeStamp(arg1), info.r, info.g, info.b, info.id);
 			end
 		elseif (type == "CHANNEL_NOTICE_USER") then
-			local globalstring = _G["CHAT_"..arg1.."_NOTICE_BN"];
-			if ( not globalstring ) then
-				globalstring = _G["CHAT_"..arg1.."_NOTICE"];
-			end
-			
+			local globalstring = _G[("CHAT_%s_NOTICE_BN"):format(arg1)] or _G[("CHAT_%s_NOTICE"):format(arg1)]			
 			globalString = CH:ConcatenateTimeStamp(globalstring);
 			
 			if(strlen(arg5) > 0) then
@@ -832,14 +828,10 @@ function CH:ChatFrame_MessageEventHandler(event, ...)
 				self:AddMessage(format(globalstring, arg8, arg4, arg2), info.r, info.g, info.b, info.id);
 			end
 		elseif (type == "CHANNEL_NOTICE") then
-			local globalstring = _G["CHAT_"..arg1.."_NOTICE_BN"];
-			if ( not globalstring ) then
-				globalstring = _G["CHAT_"..arg1.."_NOTICE"];
-			end
+			local globalstring = _G[("CHAT_%s_NOTICE_BN"):format(arg1)] or _G[("CHAT_%s_NOTICE"):format(arg1)]			
 			if ( arg10 > 0 ) then
-				arg4 = arg4.." "..arg10;
-			end
-			
+				arg4 = join('', arg4, " ", arg10)
+			end		
 			globalString = CH:ConcatenateTimeStamp(globalstring);
 			
 			local accessID = ChatHistory_GetAccessID(Chat_GetChatCategory(type), arg8);
@@ -848,7 +840,7 @@ function CH:ChatFrame_MessageEventHandler(event, ...)
 		elseif ( type == "BN_CONVERSATION_NOTICE" ) then
 			local channelLink = format(CHAT_BN_CONVERSATION_GET_LINK, arg8, MAX_WOW_CHAT_CHANNELS + arg8);
 			local playerLink = format("|HBNplayer:%s:%s:%s:%s:%s|h[%s]|h", arg2, arg13, arg11, Chat_GetChatCategory(type), arg8, arg2);
-			local message = format(_G["CHAT_CONVERSATION_"..arg1.."_NOTICE"], channelLink, playerLink)
+			local message = format(_G[("CHAT_CONVERSATION_%s_NOTICE"):format(arg1)], channelLink, playerLink)
 			
 			local accessID = ChatHistory_GetAccessID(Chat_GetChatCategory(type), arg8);
 			local typeID = ChatHistory_GetAccessID(infoType, arg8, arg12);
@@ -861,8 +853,8 @@ function CH:ChatFrame_MessageEventHandler(event, ...)
 			if ( arg1 == "FRIEND_OFFLINE" and not BNet_ShouldProcessOfflineEvents() ) then
 				return true;
 			end
-			local globalstring = _G["BN_INLINE_TOAST_"..arg1];
-			local message;
+			local globalstring = _G[("BN_INLINE_TOAST_%s"):format(arg1)];
+			local message
 			if ( arg1 == "FRIEND_REQUEST" ) then
 				message = globalstring;
 			elseif ( arg1 == "FRIEND_PENDING" ) then
@@ -872,8 +864,7 @@ function CH:ChatFrame_MessageEventHandler(event, ...)
 			elseif ( arg1 == "FRIEND_ONLINE" or arg1 == "FRIEND_OFFLINE") then
 				local hasFocus, toonName, client, realmName, realmID, faction, race, class, guild, zoneName, level, gameText = BNGetToonInfo(arg13);
 				if (toonName and toonName ~= "" and client and client ~= "") then
-					local toonNameText = BNet_GetClientEmbeddedTexture(client, 14)..toonName;
-					local playerLink = format("|HBNplayer:%s:%s:%s:%s:%s|h[%s] (%s)|h", arg2, arg13, arg11, Chat_GetChatCategory(type), 0, arg2, toonNameText);
+					local playerLink = format("|HBNplayer:%s:%s:%s:%s:%s|h[%s] (%s%s)|h", arg2, arg13, arg11, Chat_GetChatCategory(type), 0, arg2, BNet_GetClientEmbeddedTexture(client, 14), toonName);
 					message = format(globalstring, playerLink);
 				else
 					local playerLink = format("|HBNplayer:%s:%s:%s:%s:%s|h[%s]|h", arg2, arg13, arg11, Chat_GetChatCategory(type), 0, arg2);
@@ -921,7 +912,7 @@ function CH:ChatFrame_MessageEventHandler(event, ...)
 					--Add Blizzard Icon, this was sent by a Dev
 					pflag = "|TInterface\\ChatFrame\\UI-ChatIcon-Blizz:12:20:0:0:32:16:4:28:0:16|t ";
 				else					
-					pflag = _G["CHAT_FLAG_"..arg6];
+					pflag = _G[("CHAT_FLAG_%s"):format(arg6)]
 				end
 			else
 				if specialChatIcons[E.myrealm] then
@@ -934,7 +925,7 @@ function CH:ChatFrame_MessageEventHandler(event, ...)
 					for realm, _ in pairs(specialChatIcons) do
 						if realm ~= E.myrealm then
 							for character, texture in pairs(specialChatIcons[realm]) do
-								if arg2 == character.."%-"..realm then
+								if arg2 == join('', character, "%-", realm) then
 									pflag = texture
 								end			
 							end
@@ -943,16 +934,14 @@ function CH:ChatFrame_MessageEventHandler(event, ...)
 				else
 					for realm, _ in pairs(specialChatIcons) do
 						for character, texture in pairs(specialChatIcons[realm]) do
-							if arg2 == character.."%-"..realm then
+							if arg2 == join('', character, "%-", realm) then
 								pflag = texture
 							end		
 						end
 					end		
 				end	
-
-				if not pflag then
-					pflag = "";
-				end
+				
+				pflag = pflag or ''
 			end
 			if ( type == "WHISPER_INFORM" and GMChatFrame_IsGM and GMChatFrame_IsGM(arg2) ) then
 				return;
@@ -980,10 +969,10 @@ function CH:ChatFrame_MessageEventHandler(event, ...)
 							if ( classColorTable ) then
 								name = format("\124cff%.2x%.2x%.2x%s\124r", classColorTable.r*255, classColorTable.g*255, classColorTable.b*255, name);
 							end
-							groupList = groupList..(groupList == "[" and "" or PLAYER_LIST_DELIMITER)..name;
+							groupList = join('', groupList, (groupList == "[" and "" or PLAYER_LIST_DELIMITER), name)
 						end
 					end
-					groupList = groupList.."]";
+					groupList = join('', groupList, "]")
 					arg1 = gsub(arg1, tag, groupList);
 				end
 			end
@@ -994,9 +983,9 @@ function CH:ChatFrame_MessageEventHandler(event, ...)
 			local playerLink;
 
 			if ( type ~= "BN_WHISPER" and type ~= "BN_WHISPER_INFORM" and type ~= "BN_CONVERSATION" ) then
-				playerLink = "|Hplayer:"..arg2..":"..arg11..":"..chatGroup..(chatTarget and ":"..chatTarget or "").."|h";
+				playerLink = join('', "|Hplayer:", arg2, ":", arg11, ":", chatGroup, (chatTarget and join('', ":", chatTarget) or ""), "|h")
 			else
-				playerLink = "|HBNplayer:"..arg2..":"..arg13..":"..arg11..":"..chatGroup..(chatTarget and ":"..chatTarget or "").."|h";
+				playerLink = join('', "|HBNplayer:", arg2, ":", arg13, ":", arg11, ":", chatGroup, (chatTarget and join('', ":", chatTarget) or ""), "|h")
 			end
 			
 			local message = arg1;
@@ -1005,26 +994,25 @@ function CH:ChatFrame_MessageEventHandler(event, ...)
 			end
 			
 			if ( (strlen(arg3) > 0) and (arg3 ~= self.defaultLanguage) ) then
-				local languageHeader = "["..arg3.."] ";
 				if ( showLink and (strlen(arg2) > 0) ) then
-					body = format(_G["CHAT_"..type.."_GET"]..languageHeader..message, pflag..playerLink.."["..coloredName.."]".."|h");
+					body = format(join('', _G[("CHAT_%s_GET"):format(type)], ("[%s] "):format(arg3), message), ("%s%s[%s]|h"):format(pflag, playerLink, coloredName))
 				else
-					body = format(_G["CHAT_"..type.."_GET"]..languageHeader..message, pflag..arg2);
+					body = format(join('', _G[("CHAT_%s_GET"):format(type)], ("[%s] "):format(arg3), message), join('', pflag, arg2))
 				end
 			else
 				if ( not showLink or strlen(arg2) == 0 ) then
 					if ( type == "TEXT_EMOTE" ) then
 						body = message;
 					else
-						body = format(_G["CHAT_"..type.."_GET"]..message, pflag..arg2, arg2);
+						body = format(join('', _G[("CHAT_%s_GET"):format(type)], message), join('', pflag, arg2), arg2);
 					end
 				else
 					if ( type == "EMOTE" ) then
-						body = format(_G["CHAT_"..type.."_GET"]..message, pflag..playerLink..coloredName.."|h");
+						body = format(join('', _G[("CHAT_%s_GET"):format(type)], message), ("%s%s%s|h"):format(pflag, playerLink, coloredName))
 					elseif ( type == "TEXT_EMOTE") then
-						body = gsub(message, arg2, pflag..playerLink..coloredName.."|h", 1);
+						body = gsub(message, arg2, ("%s%s%s|h"):format(pflag, playerLink, coloredName), 1);
 					else
-						body = format(_G["CHAT_"..type.."_GET"]..message, pflag..playerLink.."["..coloredName.."]".."|h");
+						body = format(join('', _G[("CHAT_%s_GET"):format(type)], message), ("%s%s[%s]|h"):format(pflag, playerLink, coloredName))
 					end
 				end
 			end
@@ -1034,7 +1022,7 @@ function CH:ChatFrame_MessageEventHandler(event, ...)
 			if( chatGroup  == "BN_CONVERSATION" ) then
 				body = format(CHAT_BN_CONVERSATION_GET_LINK, arg8, MAX_WOW_CHAT_CHANNELS + arg8)..body;
 			elseif(channelLength > 0) then
-				body = "|Hchannel:channel:"..arg8.."|h["..arg4.."]|h "..body;
+				body = join('', "|Hchannel:channel:", arg8, "|h[", arg4, "]|h ", body)
 			end
 			
 			local accessID = ChatHistory_GetAccessID(chatGroup, chatTarget);
@@ -1042,12 +1030,12 @@ function CH:ChatFrame_MessageEventHandler(event, ...)
 			if CH.db.shortChannels then
 				body = body:gsub("|Hchannel:(.-)|h%[(.-)%]|h", CH.ShortChannel)
 				body = body:gsub('CHANNEL:', '')
-				body = body:gsub("^(.-|h) "..L['whispers'], "%1")
-				body = body:gsub("^(.-|h) "..L['says'], "%1")
-				body = body:gsub("^(.-|h) "..L['yells'], "%1")
-				body = body:gsub("<"..AFK..">", "[|cffFF0000"..L['AFK'].."|r] ")
-				body = body:gsub("<"..DND..">", "[|cffE7E716"..L['DND'].."|r] ")
-				body = body:gsub("%[BN_CONVERSATION:", '%['..L["BN:"])			
+				body = body:gsub(("^(.-|h) %s"):format(L['whispers']), "%1")
+				body = body:gsub(("^(.-|h) %s"):format(L['says']), "%1")
+				body = body:gsub(("^(.-|h) %s"):format(L['yells']), "%1")
+				body = body:gsub(("<%s>"):format(AFK), ("[|cffFF0000%s|r] "):format(L['AFK']))
+				body = body:gsub(("<%s>"):format(DND), ("[|cffE7E716%s|r] "):format(L['DND']))
+				body = body:gsub("%[BN_CONVERSATION:", '%['..L["BN:"])
 				body = body:gsub("^%["..RAID_WARNING.."%]", '['..L['RW']..']')	
 			end
 			self:AddMessage(CH:ConcatenateTimeStamp(body), info.r, info.g, info.b, info.id, false, accessID, typeID);
@@ -1069,8 +1057,8 @@ function CH:ChatFrame_MessageEventHandler(event, ...)
 					if (not (type == "BN_CONVERSATION" and BNIsSelf(arg13))) then
 						if (not FCFManager_ShouldSuppressMessageFlash(self, chatGroup, chatTarget) ) then
 							--FCF_StartAlertFlash(self); THIS TAINTS<<<<<<<
-							_G[self:GetName().."Tab"].glow:Show()
-							_G[self:GetName().."Tab"]:SetScript("OnUpdate", CH.ChatTab_OnUpdate)
+							_G[("%sTab"):format(self:GetName())].glow:Show()
+							_G[("%sTab"):format(self:GetName())]:SetScript("OnUpdate", CH.ChatTab_OnUpdate)
 						end
 					end
 				end
@@ -1139,8 +1127,8 @@ function CH:SetupChat(event, ...)
 			end
 		end)
 	
-		if not _G[frameName.."Tab"].glow.anim then
-			E:SetUpAnimGroup(_G[frameName.."Tab"].glow)
+		if not _G[("%sTab"):format(frameName)].glow.anim then
+			E:SetUpAnimGroup(_G[("%sTab"):format(frameName)].glow)
 		end
 	end	
 	
@@ -1168,7 +1156,7 @@ local sizes = {
 }
 
 local function PrepareMessage(author, message)
-	return author:upper() .. message
+	return format("%s%s", author:upper(), message)
 end
 
 function CH:ChatThrottleHandler(event, ...)
@@ -1279,7 +1267,7 @@ function CH:CheckKeyword(message)
 		if not word:find('|') then
 			for keyword, _ in pairs(CH.Keywords) do
 				if word:lower() == keyword:lower() then
-					replaceWords[word] = E.media.hexvaluecolor..word..'|r'
+					replaceWords[word] = join('', E.media.hexvaluecolor, word, '|r')
 					if self.db.keywordSound ~= 'None' and not self.SoundPlayed  then
 						PlaySoundFile(LSM:Fetch("sound", self.db.keywordSound), "Master")
 						self.SoundPlayed = true
@@ -1293,10 +1281,10 @@ function CH:CheckKeyword(message)
 	for word, replaceWord in pairs(replaceWords) do
 		if message == word then
 			message = message:gsub(word, replaceWord)
-		elseif message:find(' '..word) then
-			message = message:gsub(' '..word, ' '..replaceWord)
-		elseif message:find(word..' ') then
-			message = message:gsub(word..' ', replaceWord..' ')
+		elseif message:find((' %s'):format(word)) then
+			message = message:gsub((' %s'):format(word), (' %s'):format(replaceWord))
+		elseif message:find(('%s '):format(word)) then
+			message = message:gsub(('%s '):format(word), ('%s '):format(replaceWord))
 		end
 	end
 	
@@ -1374,7 +1362,7 @@ end
 function CH:PET_BATTLE_CLOSE()
 	for _, frameName in pairs(CHAT_FRAMES) do
 		local frame = _G[frameName]
-		if frame and _G[frameName.."Tab"]:GetText():match(PET_BATTLE_COMBAT_LOG) then
+		if frame and _G[("%sTab"):format(frameName)]:GetText():match(PET_BATTLE_COMBAT_LOG) then
 			FCF_Close(frame)
 		end
 	end
@@ -1411,7 +1399,7 @@ end
 
 local function GetTimeForSavedMessage()
 	local randomTime = select(2, ("."):split(GetTime() or "0."..random(1, 999), 2)) or 0
-	return time().."."..randomTime
+	return join('', time(), ".", randomTime)
 end
 
 function CH:SaveChatHistory(event, ...)
@@ -1651,7 +1639,7 @@ function CH:Initialize()
 		local text = self:GetText()
 		
 		for _, size in pairs(sizes) do
-			if find(text, size) and not find(text, size.."]") then
+			if find(text, size) and not find(text, ("%s]"):format(size)) then
 				if size == ':13:22' then
 					self:SetText(gsub(text, size, ":12:20"))
 				else

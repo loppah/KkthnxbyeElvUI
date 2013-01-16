@@ -7,6 +7,7 @@ local selectedSpell;
 local selectedFilter;
 local filters;
 local tinsert = table.insert
+local pairs, tonumber = pairs, tonumber
 function UF:CreateCustomTextGroup(unit, objectName)
 	if E.Options.args.unitframe.args[unit].args[objectName] then return end
 	
@@ -6682,7 +6683,7 @@ E.Options.args.unitframe.args.boss = {
 			order = 3,
 			name = L['Display Frames'],
 			desc = L['Force the frames to show, they will act as if they are the player frame.'],
-			func = function() UF:ToggleForceShowGroupFrames('boss', 4) end,
+			func = function() UF:ToggleForceShowGroupFrames('boss%d', 4) end,
 		},
 		width = {
 			order = 4,
@@ -7282,7 +7283,7 @@ E.Options.args.unitframe.args.arena = {
 			order = 3,
 			name = L['Display Frames'],
 			desc = L['Force the frames to show, they will act as if they are the player frame.'],
-			func = function() UF:ToggleForceShowGroupFrames('arena', 5) end,
+			func = function() UF:ToggleForceShowGroupFrames('arena%d', 5) end,
 		},		
 		width = {
 			order = 4,

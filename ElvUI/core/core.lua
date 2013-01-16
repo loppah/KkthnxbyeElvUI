@@ -3,10 +3,9 @@ local LSM = LibStub("LibSharedMedia-3.0")
 local _, ns = ...
 local ElvUF = ns.oUF
 
-local find = string.find
-local split = string.split
-local match = string.match
-local wipe = table.wipe
+local find, split, match, format = string.find, string.split, string.match, string.format
+local twipe = table.wipe
+local pairs, select, type, tonumber = pairs, select, type, tonumber
 
 --Constants
 _, E.myclass = UnitClass("player");
@@ -133,7 +132,7 @@ E.KnownColors = {
 E.noop = function() end;
 
 function E:Print(msg)
-	print(self["media"].hexvaluecolor..'ElvUI:|r', msg)
+	print(('%sElvUI:|r'):format(self["media"].hexvaluecolor), msg)
 end
 
 --Basically check if another class border is being used on a class that doesn't match. And then return true if a match is found.
@@ -604,7 +603,7 @@ end
 
 function E:RefreshModulesDB()
 	local UF = self:GetModule('UnitFrames')
-	wipe(UF.db)
+	twipe(UF.db)
 	UF.db = self.db.unitframe
 end
 
@@ -626,9 +625,9 @@ function E:DBConversions()
 end
 
 function E:Initialize()
-	wipe(self.db)
-	wipe(self.global)
-	wipe(self.private)
+	twipe(self.db)
+	twipe(self.global)
+	twipe(self.private)
 	
 	self.data = LibStub("AceDB-3.0"):New("ElvDB", self.DF);
 	self.data.RegisterCallback(self, "OnProfileChanged", "UpdateAll")

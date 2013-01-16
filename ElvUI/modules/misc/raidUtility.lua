@@ -5,6 +5,7 @@ E.RaidUtility = RU
 
 local PANEL_HEIGHT = 125
 local find = string.find
+local pairs, unpack, tonumber = pairs, unpack, tonumber
 
 --Check if We are Raid Leader or Raid Officer
 local function CheckRaidStatus()
@@ -221,9 +222,9 @@ function RU:Initialize()
 
 		for i, button in pairs(buttons) do
 			local f = _G[button]
-			_G[button.."Left"]:SetAlpha(0)
-			_G[button.."Middle"]:SetAlpha(0)	
-			_G[button.."Right"]:SetAlpha(0)
+			_G[("%sLeft"):format(button)]:SetAlpha(0)
+			_G[("%sMiddle"):format(button)]:SetAlpha(0)	
+			_G[("%sRight"):format(button)]:SetAlpha(0)
 			f:SetHighlightTexture("")
 			f:SetDisabledTexture("")
 			f:HookScript("OnEnter", ButtonEnter)

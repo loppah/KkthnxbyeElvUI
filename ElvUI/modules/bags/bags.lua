@@ -1,8 +1,11 @@
 local E, L, V, P, G, _ = unpack(select(2, ...)); --Inport: Engine, Locales, PrivateDB, ProfileDB, GlobalDB, Localize Underscore
 local B = E:NewModule('Bags', 'AceHook-3.0', 'AceEvent-3.0', 'AceTimer-3.0');
 
-local len, sub, find, format, floor = string.len, string.sub, string.find, string.format, math.floor
+local len, sub, find, format, join, floor = string.len, string.sub, string.find, string.format, string.join, math.floor
 local tinsert = table.insert
+local pairs, ipairs, type, unpack = pairs, ipairs, type, unpack
+
+local moneyString = join("", " |cffffffff%d", L.goldabbrev, " |cffffffff%d", L.silverabbrev, " |cffffffff%d", L.copperabbrev)
 
 B.ProfessionColors = {
 	[0x0008] = {224/255, 187/255, 74/255}, -- Leatherworking
@@ -60,7 +63,7 @@ function B:DisableBlizzard()
 	BankFrame:UnregisterAllEvents();
 	
 	for i=1, NUM_CONTAINER_FRAMES do
-		_G['ContainerFrame'..i]:Kill();
+		_G[('ContainerFrame%d'):format(i)]:Kill();
 	end
 end
 
@@ -260,9 +263,9 @@ function B:Layout(isBank)
 		if (not isBank and bagID <= 3 ) or (isBank and bagID ~= -1 and numContainerSlots >= 1 and not (i - 1 > numContainerSlots)) then
 			if not f.ContainerHolder[i] then
 				if isBank then
-					f.ContainerHolder[i] = CreateFrame("CheckButton", "ElvUIBankBag" .. bagID - 4, f.ContainerHolder, "BankItemButtonBagTemplate")
+					f.ContainerHolder[i] = CreateFrame("CheckButton", ("ElvUIBankBag%d"):format(bagID - 4), f.ContainerHolder, "BankItemButtonBagTemplate")
 				else
-					f.ContainerHolder[i] = CreateFrame("CheckButton", "ElvUIMainBag" .. bagID .. "Slot", f.ContainerHolder, "BagSlotButtonTemplate")
+					f.ContainerHolder[i] = CreateFrame("CheckButton", ("ElvUIMainBag%dSlot"):format(bagID), f.ContainerHolder, "BagSlotButtonTemplate")
 				end
 				
 				f.ContainerHolder[i]:SetTemplate('Default', true)
@@ -283,7 +286,7 @@ function B:Layout(isBank)
 					end			
 				end
 				
-				f.ContainerHolder[i].iconTexture = _G[f.ContainerHolder[i]:GetName()..'IconTexture'];
+				f.ContainerHolder[i].iconTexture = _G[('%sIconTexture'):format(f.ContainerHolder[i]:GetName())];
 				f.ContainerHolder[i].iconTexture:SetInside()
 				f.ContainerHolder[i].iconTexture:SetTexCoord(unpack(E.TexCoords))
 			end
@@ -310,7 +313,7 @@ function B:Layout(isBank)
 		local numSlots = GetContainerNumSlots(bagID);
 		if numSlots > 0 then
 			if not f.Bags[bagID] then
-				f.Bags[bagID] = CreateFrame('Frame', f:GetName()..'Bag'..bagID, f);
+				f.Bags[bagID] = CreateFrame('Frame', join('', f:GetName(), 'Bag', bagID), f);
 				f.Bags[bagID]:SetID(bagID);
 				f.Bags[bagID].UpdateBagSlots = B.UpdateBagSlots;
 				f.Bags[bagID].UpdateSlot = UpdateSlot;
@@ -329,7 +332,7 @@ function B:Layout(isBank)
 			for slotID = 1, numSlots do
 				f.totalSlots = f.totalSlots + 1;
 				if not f.Bags[bagID][slotID] then
-					f.Bags[bagID][slotID] = CreateFrame('CheckButton', f.Bags[bagID]:GetName()..'Slot'..slotID, f.Bags[bagID], bagID == -1 and 'BankItemButtonGenericTemplate' or 'ContainerFrameItemButtonTemplate');
+					f.Bags[bagID][slotID] = CreateFrame('CheckButton', ('%sSlot%d'):format(f.Bags[bagID]:GetName(), slotID), f.Bags[bagID], bagID == -1 and 'BankItemButtonGenericTemplate' or 'ContainerFrameItemButtonTemplate');
 					f.Bags[bagID][slotID]:StyleButton();
 					f.Bags[bagID][slotID]:SetTemplate('Default', true);
 					f.Bags[bagID][slotID]:SetNormalTexture(nil);
@@ -338,17 +341,17 @@ function B:Layout(isBank)
 					f.Bags[bagID][slotID].count:ClearAllPoints();
 					f.Bags[bagID][slotID].count:Point('BOTTOMRIGHT', 0, 2);
 					
-					f.Bags[bagID][slotID].questIcon = _G[f.Bags[bagID][slotID]:GetName()..'IconQuestTexture'];
+					f.Bags[bagID][slotID].questIcon = _G[('%sIconQuestTexture'):format(f.Bags[bagID][slotID]:GetName())]
 					f.Bags[bagID][slotID].questIcon:SetTexture(TEXTURE_ITEM_QUEST_BANG);
-					f.Bags[bagID][slotID].questIcon:SetInside(f.Bags[bagID][slotID]);
-					f.Bags[bagID][slotID].questIcon:SetTexCoord(unpack(E.TexCoords));
+					f.Bags[bagID][slotID].questIcon:SetInside(f.Bags[bagID][slotID])
+					f.Bags[bagID][slotID].questIcon:SetTexCoord(unpack(E.TexCoords))
 					f.Bags[bagID][slotID].questIcon:Hide();
 					
-					f.Bags[bagID][slotID].iconTexture = _G[f.Bags[bagID][slotID]:GetName()..'IconTexture'];
-					f.Bags[bagID][slotID].iconTexture:SetInside(f.Bags[bagID][slotID]);
-					f.Bags[bagID][slotID].iconTexture:SetTexCoord(unpack(E.TexCoords));
+					f.Bags[bagID][slotID].iconTexture = _G[('%sIconTexture'):format(f.Bags[bagID][slotID]:GetName())]
+					f.Bags[bagID][slotID].iconTexture:SetInside(f.Bags[bagID][slotID])
+					f.Bags[bagID][slotID].iconTexture:SetTexCoord(unpack(E.TexCoords))
 					
-					f.Bags[bagID][slotID].cooldown = _G[f.Bags[bagID][slotID]:GetName()..'Cooldown'];
+					f.Bags[bagID][slotID].cooldown = _G[('%sCooldown'):format(f.Bags[bagID][slotID]:GetName())]
 					f.Bags[bagID][slotID].bagID = bagID
 					f.Bags[bagID][slotID].slotID = slotID
 				end
@@ -532,15 +535,15 @@ function B:VendorGrays(delete, nomsg)
 			end
 		end
 	end
-
+	
 	if c>0 and not delete then
 		local g, s, c = floor(c/10000) or 0, floor((c%10000)/100) or 0, c%100
-		E:Print(L['Vendored gray items for:'].." |cffffffff"..g..L.goldabbrev.." |cffffffff"..s..L.silverabbrev.." |cffffffff"..c..L.copperabbrev..".")
+		E:Print(join('', L['Vendored gray items for:'], format(moneyString, g, s, c), "."))
 	elseif not delete and not nomsg then
 		E:Print(L['No gray items to sell.'])
 	elseif count > 0 then
 		local g, s, c = floor(c/10000) or 0, floor((c%10000)/100) or 0, c%100
-		E:Print(format(L['Deleted %d gray items. Total Worth: %s'], count, " |cffffffff"..g..L.goldabbrev.." |cffffffff"..s..L.silverabbrev.." |cffffffff"..c..L.copperabbrev.."."))
+		E:Print(format(L['Deleted %d gray items. Total Worth: %s.'], count, format(moneyString, g, s, c)))
 	elseif not nomsg then
 		E:Print(L['No gray items to delete.'])
 	end
@@ -592,7 +595,7 @@ function B:ContructContainerFrame(name, isBank)
 	f.BagIDs = isBank and {-1, 5, 6, 7, 8, 9, 10, 11} or {0, 1, 2, 3, 4};
 	f.Bags = {};
 	
-	f.closeButton = CreateFrame('Button', name..'CloseButton', f, 'UIPanelCloseButton');
+	f.closeButton = CreateFrame('Button', ('%sCloseButton'):format(name), f, 'UIPanelCloseButton');
 	f.closeButton:Point('TOPRIGHT', -4, -4);
 
 	E:GetModule('Skins'):HandleCloseButton(f.closeButton);
@@ -601,7 +604,7 @@ function B:ContructContainerFrame(name, isBank)
 	f.holderFrame:Point('TOP', f, 'TOP', 0, -f.topOffset);
 	f.holderFrame:Point('BOTTOM', f, 'BOTTOM', 0, 8);
 	
-	f.ContainerHolder = CreateFrame('Button', name..'ContainerHolder', f)
+	f.ContainerHolder = CreateFrame('Button', ('%sContainerHolder'):format(name), f)
 	f.ContainerHolder:Point('BOTTOMLEFT', f, 'TOPLEFT', 0, 1)
 	f.ContainerHolder:SetTemplate('Transparent')
 	f.ContainerHolder:Hide()
@@ -690,7 +693,7 @@ function B:ContructContainerFrame(name, isBank)
 		f.goldText:SetJustifyH("RIGHT")
 		
 		--Search
-		f.editBox = CreateFrame('EditBox', name..'EditBox', f);
+		f.editBox = CreateFrame('EditBox', ('%sEditBox'):format(name), f);
 		f.editBox:SetFrameLevel(f.editBox:GetFrameLevel() + 2);
 		f.editBox:CreateBackdrop('Default', true);
 		f.editBox:Height(15);

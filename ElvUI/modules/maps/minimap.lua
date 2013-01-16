@@ -4,7 +4,7 @@ E.Minimap = M
 
 local gsub = string.gsub
 local upper = string.upper
-
+local pairs = pairs
 local calendar_string = gsub(SLASH_CALENDAR1, "/", "")
 calendar_string = gsub(calendar_string, "^%l", upper)
 
@@ -387,7 +387,7 @@ function M:Initialize()
 	--PET JOURNAL TAINT FIX AS OF 5.1
 	local info = UIPanelWindows['PetJournalParent'];
 	for name, value in pairs(info) do
-		PetJournalParent:SetAttribute("UIPanelLayout-"..name, value);
+		PetJournalParent:SetAttribute(("UIPanelLayout-%s"):format(name), value);
 	end	
 
 	PetJournalParent:SetAttribute("UIPanelLayout-defined", true);	
