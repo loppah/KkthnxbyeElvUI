@@ -424,7 +424,7 @@ P['unitframe'] = {
 			},
 			['name'] = {
 				['position'] = 'CENTER',
-				['text_format'] = '[namecolor][name:medium] [difficultycolor][smartlevel] [shortclassification]',
+				['text_format'] = '[namecolor][name:medium][afk] [difficultycolor][smartlevel] [shortclassification]',
 			},
 			['portrait'] = {
 				['enable'] = false,
@@ -942,7 +942,7 @@ P['unitframe'] = {
 			},			
 			['name'] = {
 				['position'] = 'LEFT',
-				['text_format'] = '[namecolor][name:medium]',
+				['text_format'] = '[namecolor][name:medium][afk]',
 			},
 			['buffs'] = {
 				['enable'] = true,
@@ -1018,7 +1018,7 @@ P['unitframe'] = {
 				['text_format'] = '[healthcolor][health:current-percent]',
 				['position'] = 'TOPRIGHT',
 				['orientation'] = 'HORIZONTAL',
-				['frequentUpdates'] = false,
+				['frequentUpdates'] = true,
 			},
 			['power'] = {
 				['enable'] = true,
@@ -1031,7 +1031,7 @@ P['unitframe'] = {
 			},			
 			['name'] = {
 				['position'] = 'LEFT',
-				['text_format'] = '[namecolor][name:medium] [difficultycolor][smartlevel]',
+				['text_format'] = '[namecolor][name:medium][afk] [difficultycolor][smartlevel]',
 			},
 			['buffs'] = {
 				['enable'] = false,
@@ -1127,7 +1127,7 @@ P['unitframe'] = {
 				['text_format'] = '[healthcolor][health:deficit]',
 				['position'] = 'BOTTOM',
 				['orientation'] = 'HORIZONTAL',
-				['frequentUpdates'] = false,
+				['frequentUpdates'] = true,
 			},
 			['power'] = {
 				['enable'] = true,
@@ -1140,7 +1140,7 @@ P['unitframe'] = {
 			},			
 			['name'] = {
 				['position'] = 'TOP',
-				['text_format'] = '[namecolor][name:short]',
+				['text_format'] = '[namecolor][name:short][afk]',
 			},
 			['buffs'] = {
 				['enable'] = false,
@@ -1226,7 +1226,7 @@ P['unitframe'] = {
 				['text_format'] = '[healthcolor][health:deficit]',
 				['position'] = 'BOTTOM',
 				['orientation'] = 'HORIZONTAL',
-				['frequentUpdates'] = false,
+				['frequentUpdates'] = true,
 			},
 			['power'] = {
 				['enable'] = true,
@@ -1239,7 +1239,7 @@ P['unitframe'] = {
 			},			
 			['name'] = {
 				['position'] = 'TOP',
-				['text_format'] = '[namecolor][name:short]',
+				['text_format'] = '[namecolor][name:short][afk]',
 			},
 			['buffs'] = {
 				['enable'] = false,
@@ -1323,7 +1323,7 @@ P['unitframe'] = {
 				['text_format'] = '',
 				['position'] = 'BOTTOM',
 				['orientation'] = 'HORIZONTAL',
-				['frequentUpdates'] = false,
+				['frequentUpdates'] = true,
 			},
 			['power'] = {
 				['enable'] = false,
@@ -1336,7 +1336,7 @@ P['unitframe'] = {
 			},			
 			['name'] = {
 				['position'] = 'CENTER',
-				['text_format'] = '[namecolor][name:short]',
+				['text_format'] = '[namecolor][name:short][afk]',
 			},
 			['buffs'] = {
 				['enable'] = false,
