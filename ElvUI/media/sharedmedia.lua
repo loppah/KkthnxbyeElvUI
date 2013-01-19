@@ -5,6 +5,7 @@ LSM:Register("border", "ElvUI GlowBorder", [[Interface\AddOns\ElvUI\media\textur
 LSM:Register("font", "Oswald Regular", [[Interface\AddOns\ElvUI\media\fonts\Oswald-Regular.ttf]])
 LSM:Register("font", "AgencyFB Bold", [[Interface\AddOns\ElvUI\media\fonts\AgencyFB_Bold.ttf]])
 LSM:Register("font", "Oswald Light", [[Interface\AddOns\ElvUI\media\fonts\Oswald-Light.ttf]])
+LSM:Register("font", "FrizQT", [[Interface\AddOns\ElvUI\media\fonts\FrizQT.ttf]])
 LSM:Register("font", "Oswald Bold", [[Interface\AddOns\ElvUI\media\fonts\Oswald-Bold.ttf]])
 LSM:Register("font", "BigNoodleTitling", [[Interface\AddOns\ElvUI\media\fonts\BigNoodleTitling.ttf]])
 LSM:Register("font", "ElvUI Alt-Font", [[Interface\AddOns\ElvUI\media\fonts\Continuum_Medium.ttf]])
