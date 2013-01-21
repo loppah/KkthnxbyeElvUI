@@ -22,6 +22,8 @@ function UF:Construct_TargetFrame(frame)
 
 	frame.Debuffs = self:Construct_Debuffs(frame)
 
+	frame.GPS = self:Construct_GPS(frame, 'target')
+
 	frame.Castbar = self:Construct_Castbar(frame, 'RIGHT', L['Target Castbar'])
 	frame.Castbar.SafeZone = nil
 	frame.Castbar.LatencyTexture:Hide()
@@ -266,6 +268,21 @@ function UF:Update_TargetFrame(frame, db)
 				portrait:Hide()
 				portrait.backdrop:Hide()
 			end		
+		end
+	end
+
+	--GPS
+	do
+		local gps = frame.GPS
+	
+		if db.gps.enable then
+			local x, y = self:GetPositionOffset(db.gps.position)		
+			gps:ClearAllPoints()
+			gps:Point(db.gps.position, frame.Health, db.gps.position, x, y)
+			gps:SetFrameStrata("MEDIUM")
+			gps:Show()
+		else
+			gps:Hide()
 		end
 	end
 
