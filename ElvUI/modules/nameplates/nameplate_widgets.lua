@@ -28,6 +28,14 @@ NP.RaidTargetReference = {
 
 NP.GUIDIgnoreCast = {};
 
+NP.ComboColors = {
+	[1] = {0.69, 0.31, 0.31},
+	[2] = {0.69, 0.31, 0.31},
+	[3] = {0.65, 0.63, 0.35},
+	[4] = {0.65, 0.63, 0.35},
+	[5] = {0.33, 0.59, 0.33}
+}
+
 local AURA_TYPE_BUFF = 1
 local AURA_TYPE_DEBUFF = 6
 local AURA_TARGET_HOSTILE = 1
@@ -145,7 +153,7 @@ function NP:CreateAuraIcon(parent)
 	if E.PixelMode then
 		button.bord = button:CreateTexture(nil, "BACKGROUND")
 		button.bord:SetDrawLayer('BACKGROUND', 2)
-		button.bord:SetTexture(unpack(E["media"].bordercolor))
+		button.bord:SetTexture(unpack(E.media.bordercolor))
 		button.bord:SetPoint("TOPLEFT",button,"TOPLEFT", noscalemult,-noscalemult)
 		button.bord:SetPoint("BOTTOMRIGHT",button,"BOTTOMRIGHT",-noscalemult,noscalemult)
 		
@@ -160,7 +168,7 @@ function NP:CreateAuraIcon(parent)
 		
 		button.bord = button:CreateTexture(nil, "BACKGROUND")
 		button.bord:SetDrawLayer('BACKGROUND', 2)
-		button.bord:SetTexture(unpack(E["media"].bordercolor))
+		button.bord:SetTexture(unpack(E.media.bordercolor))
 		button.bord:SetPoint("TOPLEFT",button,"TOPLEFT", noscalemult,-noscalemult)
 		button.bord:SetPoint("BOTTOMRIGHT",button,"BOTTOMRIGHT",-noscalemult,noscalemult)
 		
@@ -320,7 +328,7 @@ function NP:SetAuraInstance(guid, spellid, expiration, stacks, caster, duration,
 		filter = true;
 	end
 	
-	local trackFilter = E.global['unitframe']['aurafilters'][self.db.trackfilter]
+	local trackFilter = E.global.unitframe.aurafilters[self.db.trackfilter]
 	if self.db.trackfilter and #self.db.trackfilter > 1 and trackFilter then
 		local name = GetSpellInfo(spellid)
 		local spellList = trackFilter.spells
@@ -858,7 +866,7 @@ function NP:CastBar_OnShow(frame)
 	frame:ClearAllPoints()
 	frame:SetSize(frame:GetParent().hp:GetWidth(), self.db.cbheight)
 	frame:SetPoint('TOP', frame:GetParent().hp, 'BOTTOM', 0, -8)
-	frame:SetStatusBarTexture(E["media"].normTex)
+	frame:SetStatusBarTexture(E.media.normTex)
 	frame:GetStatusBarTexture():SetHorizTile(true)
 	if(frame.shield:IsShown()) then
 		frame:SetStatusBarColor(0.78, 0.25, 0.25, 1)
@@ -876,12 +884,12 @@ function NP:CastBar_OnShow(frame)
 		frame:Width(frame:GetWidth() * frame:GetParent():GetEffectiveScale())
 	end
 		
-	self:SetVirtualBorder(frame, unpack(E["media"].bordercolor))
-	self:SetVirtualBackdrop(frame, unpack(E["media"].backdropcolor))	
+	self:SetVirtualBorder(frame, unpack(E.media.bordercolor))
+	self:SetVirtualBackdrop(frame, unpack(E.media.backdropcolor))	
 	
 	frame.icon:Size(self.db.cbheight + frame:GetParent().hp:GetHeight() + 8)
-	self:SetVirtualBorder(frame.icon, unpack(E["media"].bordercolor))
-	self:SetVirtualBackdrop(frame.icon, unpack(E["media"].backdropcolor))		
+	self:SetVirtualBorder(frame.icon, unpack(E.media.bordercolor))
+	self:SetVirtualBackdrop(frame.icon, unpack(E.media.backdropcolor))		
 end
 
 function NP:CastBar_OnValueChanged(frame)
@@ -897,5 +905,42 @@ function NP:CastBar_OnValueChanged(frame)
 		NP:StartCastAnimationOnNameplate(frame:GetParent(), spell, spellid, icon, start, finish, nonInt, channel) 
 	else 
 		NP:StopCastAnimation(frame:GetParent()) 
+	end
+end
+
+function NP:ToggleCPoints()
+	if self.db.comboPoints then
+		self:RegisterEvent("UNIT_COMBO_POINTS", "UpdateCPoints")
+	else
+		self:ForEachPlate(NP.HideCPoints)
+		self:UnregisterEvent("UNIT_COMBO_POINTS")
+	end
+end
+
+function NP:HideCPoints(frame)
+	for i=1, MAX_COMBO_POINTS do
+		if not frame.cpoints[i]:IsShown() then break end
+		frame.cpoints[i]:Hide()
+	end
+end
+
+function NP:UpdateCPoints(frame, isMouseover)
+	if type(frame) ~= "table" then
+		frame = self:GetTargetNameplate()
+		if frame then
+			self:ForEachPlate(self.HideCPoints)
+		end
+	end
+	
+	if not frame then return end
+	
+	local cp = GetComboPoints(UnitHasVehicleUI('player') and 'vehicle' or 'player', isMouseover and "mouseover" or "target")
+	for i=1, MAX_COMBO_POINTS do
+		if(i <= cp) then
+			frame.cpoints[i]:Show()
+			frame.cpoints[i]:SetVertexColor(unpack(NP.ComboColors[cp]))
+		else
+			frame.cpoints[i]:Hide()
+		end
 	end
 end

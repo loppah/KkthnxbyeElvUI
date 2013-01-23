@@ -2,6 +2,7 @@ local E, L, V, P, G, _ = unpack(select(2, ...)); --Inport: Engine, Locales, Priv
 local NP = E:NewModule('NamePlates', 'AceHook-3.0', 'AceEvent-3.0', 'AceTimer-3.0')
 local LSM = LibStub("LibSharedMedia-3.0")
 
+local CPOINT_TEX = [=[Interface\AddOns\ElvUI\media\textures\bubbleTex.tga]=]
 local OVERLAY = [=[Interface\TargetingFrame\UI-TargetingFrame-Flash]=]
 local numChildren = -1
 local backdrop
@@ -9,13 +10,13 @@ local backdrop
 local bgMult, good, bad, transition, transition2, combat, goodscale, badscale
 
 NP.Handled = {} --Skinned Nameplates
-NP.BattleGroundHealers = {};
+NP.Healers = {};
 
 NP.factionOpposites = {
-	['Horde'] = 1,
-	['Alliance'] = 0,
+	[0] = 1,
+	[1] = 0,
 }
-NP.Healers = {
+NP.HealerSpecs = {
 	[L['Restoration']] = true,
 	[L['Holy']] = true,
 	[L['Discipline']] = true,
@@ -27,8 +28,8 @@ local floor = math.floor
 local pairs, ipairs, type, select, unpack = pairs, ipairs, type, select, unpack
 
 function NP:Initialize()
-	self.db = E.db["nameplate"]
-	if E.private["nameplate"].enable ~= true then return end
+	self.db = E.db.nameplate
+	if E.private.nameplate.enable ~= true then return end
 	E.NamePlates = NP
 	
 	if type(self.db.healthtext) == 'Boolean' then
@@ -43,7 +44,8 @@ function NP:Initialize()
 		end	
 		
 		NP:ForEachPlate(NP.InvalidCastCheck)
-		NP:ForEachPlate(NP.UpdateColoring)	
+		NP:ForEachPlate(NP.CheckHealerIcon)
+		NP:ForEachPlate(NP.UpdateColoring)
 
 		if(self.elapsed and self.elapsed > 0.2) then
 			NP:ForEachPlate(NP.UpdateThreat)
@@ -58,6 +60,7 @@ function NP:Initialize()
 	end)	
 
 	self:UpdateAllPlates()
+	self:ToggleCPoints()
 	
 	self:RegisterEvent("GROUP_ROSTER_UPDATE", "UpdateRoster")
 	self:RegisterEvent("PARTY_CONVERTED_TO_RAID", "UpdateRoster")
@@ -91,35 +94,35 @@ function NP:CreateVirtualFrame(parent, point)
 	point.backdrop2 = parent:CreateTexture(nil, "BORDER")
 	point.backdrop2:SetDrawLayer("BORDER", -4)
 	point.backdrop2:SetAllPoints(point)
-	point.backdrop2:SetTexture(unpack(E["media"].backdropcolor))		
+	point.backdrop2:SetTexture(unpack(E.media.backdropcolor))		
 	
 	if E.PixelMode then 
 		point.bordertop = parent:CreateTexture(nil, "BORDER")
 		point.bordertop:SetPoint("TOPLEFT", point, "TOPLEFT", -noscalemult, noscalemult)
 		point.bordertop:SetPoint("TOPRIGHT", point, "TOPRIGHT", noscalemult, noscalemult)
 		point.bordertop:SetHeight(noscalemult)
-		point.bordertop:SetTexture(unpack(E["media"].bordercolor))	
+		point.bordertop:SetTexture(unpack(E.media.bordercolor))	
 		point.bordertop:SetDrawLayer("BORDER", -7)
 		
 		point.borderbottom = parent:CreateTexture(nil, "BORDER")
 		point.borderbottom:SetPoint("BOTTOMLEFT", point, "BOTTOMLEFT", -noscalemult, -noscalemult)
 		point.borderbottom:SetPoint("BOTTOMRIGHT", point, "BOTTOMRIGHT", noscalemult, -noscalemult)
 		point.borderbottom:SetHeight(noscalemult)
-		point.borderbottom:SetTexture(unpack(E["media"].bordercolor))	
+		point.borderbottom:SetTexture(unpack(E.media.bordercolor))	
 		point.borderbottom:SetDrawLayer("BORDER", -7)
 		
 		point.borderleft = parent:CreateTexture(nil, "BORDER")
 		point.borderleft:SetPoint("TOPLEFT", point, "TOPLEFT", -noscalemult, noscalemult)
 		point.borderleft:SetPoint("BOTTOMLEFT", point, "BOTTOMLEFT", noscalemult, -noscalemult)
 		point.borderleft:SetWidth(noscalemult)
-		point.borderleft:SetTexture(unpack(E["media"].bordercolor))	
+		point.borderleft:SetTexture(unpack(E.media.bordercolor))	
 		point.borderleft:SetDrawLayer("BORDER", -7)
 		
 		point.borderright = parent:CreateTexture(nil, "BORDER")
 		point.borderright:SetPoint("TOPRIGHT", point, "TOPRIGHT", noscalemult, noscalemult)
 		point.borderright:SetPoint("BOTTOMRIGHT", point, "BOTTOMRIGHT", -noscalemult, -noscalemult)
 		point.borderright:SetWidth(noscalemult)
-		point.borderright:SetTexture(unpack(E["media"].bordercolor))	
+		point.borderright:SetTexture(unpack(E.media.bordercolor))	
 		point.borderright:SetDrawLayer("BORDER", -7)			
 	else
 		point.backdrop = parent:CreateTexture(nil, "BORDER")
@@ -132,28 +135,28 @@ function NP:CreateVirtualFrame(parent, point)
 		point.bordertop:SetPoint("TOPLEFT", point, "TOPLEFT", -noscalemult*2, noscalemult*2)
 		point.bordertop:SetPoint("TOPRIGHT", point, "TOPRIGHT", noscalemult*2, noscalemult*2)
 		point.bordertop:SetHeight(noscalemult)
-		point.bordertop:SetTexture(unpack(E["media"].bordercolor))	
+		point.bordertop:SetTexture(unpack(E.media.bordercolor))	
 		point.bordertop:SetDrawLayer("BORDER", -7)
 		
 		point.borderbottom = parent:CreateTexture(nil, "BORDER")
 		point.borderbottom:SetPoint("BOTTOMLEFT", point, "BOTTOMLEFT", -noscalemult*2, -noscalemult*2)
 		point.borderbottom:SetPoint("BOTTOMRIGHT", point, "BOTTOMRIGHT", noscalemult*2, -noscalemult*2)
 		point.borderbottom:SetHeight(noscalemult)
-		point.borderbottom:SetTexture(unpack(E["media"].bordercolor))	
+		point.borderbottom:SetTexture(unpack(E.media.bordercolor))	
 		point.borderbottom:SetDrawLayer("BORDER", -7)
 		
 		point.borderleft = parent:CreateTexture(nil, "BORDER")
 		point.borderleft:SetPoint("TOPLEFT", point, "TOPLEFT", -noscalemult*2, noscalemult*2)
 		point.borderleft:SetPoint("BOTTOMLEFT", point, "BOTTOMLEFT", noscalemult*2, -noscalemult*2)
 		point.borderleft:SetWidth(noscalemult)
-		point.borderleft:SetTexture(unpack(E["media"].bordercolor))	
+		point.borderleft:SetTexture(unpack(E.media.bordercolor))	
 		point.borderleft:SetDrawLayer("BORDER", -7)
 		
 		point.borderright = parent:CreateTexture(nil, "BORDER")
 		point.borderright:SetPoint("TOPRIGHT", point, "TOPRIGHT", noscalemult*2, noscalemult*2)
 		point.borderright:SetPoint("BOTTOMRIGHT", point, "BOTTOMRIGHT", -noscalemult*2, -noscalemult*2)
 		point.borderright:SetWidth(noscalemult)
-		point.borderright:SetTexture(unpack(E["media"].bordercolor))	
+		point.borderright:SetTexture(unpack(E.media.bordercolor))	
 		point.borderright:SetDrawLayer("BORDER", -7)
 	end
 end
@@ -283,6 +286,7 @@ end
 
 function NP:HealthBar_OnShow(frame)
 	frame = frame:GetParent()
+	
 	local noscalemult = E.mult * UIParent:GetScale()
 	--Have to reposition this here so it doesnt resize after being hidden
 	frame.hp:ClearAllPoints()
@@ -369,14 +373,17 @@ function NP:OnHide(frame)
 	frame.hp.originalb = nil
 	frame.isTagged = nil
 	frame.hp.shadow:SetAlpha(0)
-	self:SetVirtualBackdrop(frame.hp, unpack(E["media"].backdropcolor))
-	self:SetVirtualBorder(frame.hp, unpack(E["media"].bordercolor))
+	self:SetVirtualBackdrop(frame.hp, unpack(E.media.backdropcolor))
+	self:SetVirtualBorder(frame.hp, unpack(E.media.bordercolor))
 	if frame.icons then
 		for _,icon in ipairs(frame.icons) do
 			icon:Hide()
 		end
 	end
 
+	for i=1, MAX_COMBO_POINTS do
+		frame.cpoints[i]:Hide()
+	end
 end
 
 function NP:SkinPlate(frame, nameFrame)
@@ -412,8 +419,29 @@ function NP:SkinPlate(frame, nameFrame)
 		frame.hp.hpbg:SetAllPoints(frame.hp)
 		frame.hp.hpbg:SetTexture(1,1,1,0.25) 	
 	end
-	frame.hp:SetStatusBarTexture(E["media"].normTex)
-	self:SetVirtualBackdrop(frame.hp, unpack(E["media"].backdropcolor))
+	frame.hp:SetStatusBarTexture(E.media.normTex)
+	self:SetVirtualBackdrop(frame.hp, unpack(E.media.backdropcolor))
+		
+	if not frame.cpoints then
+		frame.cpoints = CreateFrame("Frame", nil, frame.hp)
+		frame.cpoints:Point("CENTER", frame.hp, "BOTTOM")
+		frame.cpoints:Height(1)
+		frame.cpoints:Width(68)
+		
+		for i=1, MAX_COMBO_POINTS do
+			frame.cpoints[i] = frame.cpoints:CreateTexture(nil, 'OVERLAY')
+			frame.cpoints[i]:SetTexture(CPOINT_TEX)
+			frame.cpoints[i]:Size(12)
+			
+			if i == 1 then
+				frame.cpoints[i]:SetPoint("LEFT", frame.cpoints, "TOPLEFT")
+			else
+				frame.cpoints[i]:SetPoint("LEFT", frame.cpoints[i-1], "RIGHT", 2, 0)
+			end
+			
+			frame.cpoints[i]:Hide()
+		end
+	end
 		
 	if not frame.overlay then
 		overlay:SetTexture(1, 1, 1, 0.35)
@@ -626,7 +654,7 @@ function NP:UpdateThreat(frame)
 				end						
 			end
 		else
-			self:SetVirtualBorder(frame.hp, unpack(E["media"].bordercolor))
+			self:SetVirtualBorder(frame.hp, unpack(E.media.bordercolor))
 			if not frame.customScale and goodscale ~= 1 then
 				frame.hp:Height(self.db.height * goodscale)
 				frame.hp:Width(self.db.width * goodscale)
@@ -686,10 +714,21 @@ function NP:ScanHealth()
 		elseif(d < (threshold / 2)) then
 			NP:SetVirtualBorder(frame.hp, 1, 0, 0)
 		else
-			NP:SetVirtualBorder(frame.hp, unpack(E["media"].bordercolor))
+			NP:SetVirtualBorder(frame.hp, unpack(E.media.bordercolor))
 		end
 	elseif (frame.hasClass ~= true and frame.isFriendly ~= true) or NP.db.lowHealthWarning == 'ALL' then
-		NP:SetVirtualBorder(frame.hp, unpack(E["media"].bordercolor))
+		NP:SetVirtualBorder(frame.hp, unpack(E.media.bordercolor))
+	end
+end
+
+function NP:GetTargetNameplate()
+	if not UnitExists("target") then return end
+	
+	for frame, _ in pairs(NP.Handled) do
+		frame = _G[frame]:GetChildren()
+		if frame.guid == UnitGUID("target") then
+			return frame
+		end
 	end
 end
 
@@ -700,15 +739,20 @@ function NP:CheckUnit_Guid(frame, ...)
 		frame.unit = "target"
 		NP:UpdateAurasByUnitID("target")
 		frame.hp.shadow:SetAlpha(1)
+		NP:UpdateCPoints(frame)
 	elseif frame.overlay:IsShown() and UnitExists("mouseover") and UnitName("mouseover") == frame.hp.name:GetText() then
 		frame.guid = UnitGUID("mouseover")
 		frame.unit = "mouseover"
 		NP:UpdateAurasByUnitID("mouseover")
-		frame.hp.shadow:SetAlpha(0)
+		frame.hp.shadow:SetAlpha(0)		
+		if GetComboPoints('player', 'mouseover') > 0 then
+			NP:UpdateCPoints(frame, true)
+		end
 	else
 		frame.unit = nil
 		frame.hp.shadow:SetAlpha(0)
 	end	
+
 	--[[if not frame.test then
 		frame.test = frame:CreateFontString(nil, 'OVERLAY')
 		frame.test:Point('TOP', frame, 'TOP')
@@ -729,9 +773,9 @@ function NP:TogglePlate(frame, hide)
 end
 
 --Create our blacklist for nameplates, so prevent a certain nameplate from ever showing
-function NP:CheckFilter(frame, ...)
+function NP:CheckFilter(frame)
 	local name = frame.hp.oldname:GetText()
-	local db = E.global.nameplate["filter"][name]
+	local db = E.global.nameplate.filter[name]
 
 	if db and db.enable then
 		if db.hide then
@@ -757,31 +801,56 @@ function NP:CheckFilter(frame, ...)
 		end
 	else
 		self:TogglePlate(frame, false)
-	end
-	
+	end	
+end
+
+function NP:CheckHealerIcon(frame)
 	--Check For Healers
-	if self.BattleGroundHealers[name] then
+	if self.Healers[frame.hp.oldname:GetText()] then
 		frame.healerIcon:Show()
 	else
 		frame.healerIcon:Hide()
 	end
 end
 
+local name, faction, talentSpec
 function NP:CheckBGHealers()
 	for i = 1, GetNumBattlefieldScores() do
-		local name, _, _, _, _, faction, _, _, _, _, _, _, _, _, _, talentSpec = GetBattlefieldScore(i);
+		name, _, _, _, _, faction, _, _, _, _, _, _, _, _, _, talentSpec = GetBattlefieldScore(i);
 		if name then
 			name = name:match("(.+)%-.+") or name
-			if name and self.Healers[talentSpec] and self.factionOpposites[self.PlayerFaction] == faction then
-				self.BattleGroundHealers[name] = talentSpec
-			elseif name and self.BattleGroundHealers[name] then
-				self.BattleGroundHealers[name] = nil;
+			if name and self.HealerSpecs[talentSpec] and self.factionOpposites[self.PlayerFaction] == faction then
+				self.Healers[name] = talentSpec
+			elseif name and self.Healers[name] then
+				self.Healers[name] = nil
+			end
+		end
+	end
+end
+
+function NP:CheckArenaHealers()
+	local numOpps = GetNumArenaOpponentSpecs()
+	if not (numOpps > 1) then return end
+	
+	for i=1, 5 do
+		local name = UnitName(format('arena%d', i))
+		if name and name ~= UNKNOWN then
+			local s = GetArenaOpponentSpec(i)
+			local _, talentSpec = nil, UNKNOWN
+			if s and s > 0 then
+				_, talentSpec = GetSpecializationInfoByID(s)
+			end
+			
+			if talentSpec and talentSpec ~= UNKNOWN and self.HealerSpecs[talentSpec] then
+				self.Healers[name] = talentSpec
 			end
 		end
 	end
 end
 
 function NP:PLAYER_ENTERING_WORLD()
+	self.PlayerFaction = GetBattlefieldArenaFaction()
+	
 	if InCombatLockdown() and self.db.combat then 
 		SetCVar("nameplateShowEnemies", 1) 
 	elseif self.db.combat then
@@ -791,23 +860,27 @@ function NP:PLAYER_ENTERING_WORLD()
 	self:UpdateRoster()
 	self:CleanAuraLists()
 	
-	twipe(self.BattleGroundHealers)
+	twipe(self.Healers)
 	local inInstance, instanceType = IsInInstance()
-	if inInstance and instanceType == 'pvp' and self.db.markBGHealers then
-		self.CheckHealerTimer = self:ScheduleRepeatingTimer("CheckBGHealers", 3)
+	if inInstance and instanceType == 'pvp' and self.db.markHealers then
+		self.CheckHealerTimer = self:ScheduleRepeatingTimer("CheckBGHealers", 5)
 		self:CheckBGHealers()
+	elseif inInstance and instanceType == 'arena' and self.db.markHealers then
+		self:RegisterEvent('UNIT_NAME_UPDATE', 'CheckArenaHealers')
+		self:RegisterEvent("ARENA_OPPONENT_UPDATE", 'CheckArenaHealers');
+		self:CheckArenaHealers()	
 	else
+		self:UnregisterEvent('UNIT_NAME_UPDATE')
+		self:UnregisterEvent("ARENA_OPPONENT_UPDATE")
 		if self.CheckHealerTimer then
 			self:CancelTimer(self.CheckHealerTimer)
 			self.CheckHealerTimer = nil;
 		end
 	end
-	
-	self.PlayerFaction = UnitFactionGroup("player")
 end
 
 function NP:UpdateAllPlates()
-	if E.private["nameplate"].enable ~= true then return end
+	if E.private.nameplate.enable ~= true then return end
 	
 	good = self.db.goodcolor
 	bad = self.db.badcolor
