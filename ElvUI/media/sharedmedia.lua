@@ -4,6 +4,7 @@ LSM:Register("background","ElvUI Blank", [[Interface\BUTTONS\WHITE8X8]])
 LSM:Register("border", "ElvUI GlowBorder", [[Interface\AddOns\ElvUI\media\textures\glowTex.tga]])
 LSM:Register("font", "Oswald Regular", [[Interface\AddOns\ElvUI\media\fonts\Oswald-Regular.ttf]])
 LSM:Register("font", "AgencyFB Bold", [[Interface\AddOns\ElvUI\media\fonts\AgencyFB_Bold.ttf]])
+LSM:Register("font", "HOOGE (xCT)", [[Interface\AddOns\ElvUI\media\fonts\HOOGE.TTF]])
 LSM:Register("font", "Oswald Light", [[Interface\AddOns\ElvUI\media\fonts\Oswald-Light.ttf]])
 LSM:Register("font", "FrizQT", [[Interface\AddOns\ElvUI\media\fonts\FrizQT.ttf]])
 LSM:Register("font", "Oswald Bold", [[Interface\AddOns\ElvUI\media\fonts\Oswald-Bold.ttf]])
@@ -20,3 +21,4 @@ LSM:Register("statusbar","ElvUI Gloss", [[Interface\AddOns\ElvUI\media\textures\
 LSM:Register("statusbar","ElvUI Norm", [[Interface\AddOns\ElvUI\media\textures\normTex2.tga]])
 LSM:Register("statusbar","Minimalist", [[Interface\AddOns\ElvUI\media\textures\Minimalist.tga]])
 LSM:Register("statusbar","Flatt", [[Interface\AddOns\ElvUI\media\textures\flatt.tga]])
+

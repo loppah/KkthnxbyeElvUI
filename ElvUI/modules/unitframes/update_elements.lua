@@ -103,7 +103,8 @@ function UF:PostUpdateHealth(unit, min, max)
 	
 	--Backdrop
 	if colors.customhealthbackdrop then
-		self.bg:SetVertexColor(colors.health_backdrop.r, colors.health_backdrop.g, colors.health_backdrop.b)		
+		mu = colors.usebackdropalpha and (self.bg.multiplier or 1) or 1 
+		self.bg:SetVertexColor(colors.health_backdrop.r * mu, colors.health_backdrop.g * mu, colors.health_backdrop.b * mu)		
 	end	
 end
 
@@ -192,7 +193,7 @@ function UF:UpdateGPS(frame)
 	
 	-- GPS Disabled or not GPS parent frame visible or not in Party or Raid, Hide gps
 	if not (UnitInParty(frame.unit) or UnitInRaid(frame.unit)) then
-		if gps:IsShown() then gps:Hide() end
+		gps:Hide()
 		return
 	end
 	
@@ -200,17 +201,17 @@ function UF:UpdateGPS(frame)
 	if angle == 999 then
 		-- no bearing show - to indicate we are lost :)
 		gps.Text:SetText("-")
-		if gps.Texture:IsShown() then gps.Texture:Hide() end
-		if not gps:IsShown() then gps:Show() end
+		gps.Texture:Hide()
+		gps:Show()
 		return
 	end
 	
 	RotateTexture(gps.Texture, angle)
-	if not gps.Texture:IsShown() then gps.Texture:Show() end
+	gps.Texture:Show()
 
 	local distance = MAP:Distance(mapfile, mapfloor, px, py, tx, ty)
 	gps.Text:SetFormattedText("%d", distance)
-	if not gps:IsShown() then gps:Show() end
+	gps:Show()
 end
 
 function UF:UpdateAuraTimer(elapsed)	
